@@ -816,17 +816,17 @@ function toggleAlpha() {
 function updateSearchDisplay() {
   const dispText = document.getElementById('search-display-text');
   const clearBtn = document.getElementById('search-clear-btn');
-  const display = document.getElementById('search-display-val');
+  const wrap = document.querySelector('.search-display');
   if (searchVal) {
     dispText.className = '';
     dispText.textContent = searchVal;
     clearBtn.style.display = 'flex';
-    document.getElementById('search-display').style.borderColor = 'var(--accent)';
+    if (wrap) wrap.style.borderColor = 'var(--accent)';
   } else {
     dispText.className = 'search-placeholder';
     dispText.textContent = 'Type or use pad below…';
     clearBtn.style.display = 'none';
-    document.getElementById('search-display').style.borderColor = '';
+    if (wrap) wrap.style.borderColor = '';
   }
 }
 
@@ -851,6 +851,11 @@ function doLiveSearch() {
   // Partial match — search all entries from all uploads
   if (q.length >= 3) {
     const allEntries = uploads.flatMap(u => u.entries);
+    if (allEntries.length === 0) {
+      setStatus('⚠️ Database empty on this device — re-upload in Data tab');
+      liveEl.style.display = 'none';
+      return;
+    }
     const matches = allEntries.filter(e => {
       const s = norm(e.serial);
       const sh = norm(e.sh);
@@ -861,7 +866,7 @@ function doLiveSearch() {
     if (matches.length === 0) {
       liveEl.style.display = 'none';
       hideCard();
-      setStatus(uploads.length ? '🔍 No matches for "' + searchVal + '"' : '');
+      setStatus('No matches for "' + searchVal + '"');
       return;
     }
 
