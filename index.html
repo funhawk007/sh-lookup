@@ -3,352 +3,154 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>SH Lookup</title>
+<title>SH Lookup · Orms</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-
   :root {
-    --bg: #0f0f0f;
-    --surface: #1a1a1a;
-    --border: #2a2a2a;
-    --accent: #f97316;
-    --accent2: #fb923c;
-    --text: #f5f5f5;
-    --muted: #888;
-    --green: #22c55e;
-    --red: #ef4444;
+    --bg: #0f0f0f; --surface: #1a1a1a; --surface2: #222;
+    --border: #2a2a2a; --accent: #f97316; --text: #f5f5f5;
+    --muted: #777; --green: #22c55e; --red: #ef4444; --yellow: #eab308;
   }
+  body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; min-height: 100dvh; display: flex; flex-direction: column; }
 
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', sans-serif;
-    min-height: 100dvh;
-    display: flex;
-    flex-direction: column;
-  }
+  /* HEADER */
+  header { padding: 14px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
+  .logo { width: 30px; height: 30px; background: var(--accent); border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
+  header h1 { font-size: 16px; font-weight: 700; letter-spacing: -0.3px; }
+  header h1 span { color: var(--muted); font-weight: 400; font-size: 13px; }
+  .header-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+  .session-badge { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 4px 10px; font-size: 12px; color: var(--muted); }
+  .session-badge span { color: var(--accent); font-weight: 700; }
 
-  header {
-    padding: 16px 20px 12px;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  header .logo {
-    width: 32px; height: 32px;
-    background: var(--accent);
-    border-radius: 8px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 16px;
-  }
-
-  header h1 {
-    font-size: 17px;
-    font-weight: 600;
-    letter-spacing: -0.3px;
-  }
-
-  header span {
-    font-size: 12px;
-    color: var(--muted);
-    font-weight: 400;
-    margin-left: 2px;
-  }
-
-  .tab-bar {
-    display: flex;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .tab-bar button {
-    flex: 1;
-    padding: 12px;
-    background: none;
-    border: none;
-    color: var(--muted);
-    font-size: 13px;
-    font-weight: 500;
-    cursor: pointer;
-    border-bottom: 2px solid transparent;
-    transition: all 0.15s;
-  }
-
-  .tab-bar button.active {
-    color: var(--accent);
-    border-bottom-color: var(--accent);
-  }
-
-  .tab-content { display: none; flex: 1; flex-direction: column; }
+  /* TABS */
+  .tab-bar { display: flex; border-bottom: 1px solid var(--border); background: var(--bg); }
+  .tab-bar button { flex: 1; padding: 11px 6px; background: none; border: none; color: var(--muted); font-size: 12px; font-weight: 500; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; }
+  .tab-bar button.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .tab-content { display: none; flex: 1; flex-direction: column; overflow-y: auto; }
   .tab-content.active { display: flex; }
 
   /* SCAN TAB */
-  .scan-area {
-    padding: 16px 20px 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    flex: 1;
-  }
+  .scan-area { padding: 14px 16px 20px; display: flex; flex-direction: column; gap: 12px; }
 
-  #preview-wrap {
-    background: var(--surface);
-    border: 2px dashed var(--border);
-    border-radius: 16px;
-    min-height: 180px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-  }
+  #preview-wrap { background: var(--surface); border: 2px dashed var(--border); border-radius: 14px; min-height: 160px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+  #preview-wrap img { width: 100%; max-height: 240px; object-fit: contain; border-radius: 12px; }
+  .placeholder { display: flex; flex-direction: column; align-items: center; gap: 6px; color: var(--muted); font-size: 13px; }
+  .placeholder .icon { font-size: 32px; opacity: 0.35; }
 
-  #preview-wrap img {
-    width: 100%;
-    max-height: 280px;
-    object-fit: contain;
-    border-radius: 14px;
-  }
-
-  #preview-wrap .placeholder {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-    color: var(--muted);
-    font-size: 13px;
-  }
-
-  #preview-wrap .placeholder .icon { font-size: 36px; opacity: 0.4; }
-
-  .btn-capture {
-    background: var(--accent);
-    color: white;
-    border: none;
-    border-radius: 14px;
-    padding: 15px;
-    font-size: 16px;
-    font-weight: 600;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    -webkit-tap-highlight-color: transparent;
-  }
-
+  .btn-capture { background: var(--accent); color: white; border: none; border-radius: 12px; padding: 14px; font-size: 15px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; -webkit-tap-highlight-color: transparent; }
   .btn-capture:active { opacity: 0.8; }
   #file-input { display: none; }
 
-  .manual-row {
-    display: flex;
-    gap: 8px;
-  }
-
-  .manual-row input {
-    flex: 1;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    color: var(--text);
-    font-size: 15px;
-    font-family: 'SF Mono', 'Courier New', monospace;
-    padding: 12px 14px;
-    letter-spacing: 0.5px;
-  }
-
+  .manual-row { display: flex; gap: 8px; }
+  .manual-row input { flex: 1; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; color: var(--text); font-size: 14px; font-family: 'SF Mono', monospace; padding: 11px 13px; letter-spacing: 0.3px; }
   .manual-row input:focus { outline: none; border-color: var(--accent); }
-  .manual-row input::placeholder { color: var(--muted); font-family: -apple-system, sans-serif; letter-spacing: 0; font-size: 14px; }
-
-  .manual-row button {
-    background: var(--accent);
-    border: none;
-    color: white;
-    border-radius: 12px;
-    padding: 12px 18px;
-    font-size: 18px;
-    font-weight: 700;
-    cursor: pointer;
-    flex-shrink: 0;
-  }
-
+  .manual-row input::placeholder { color: var(--muted); font-family: -apple-system, sans-serif; letter-spacing: 0; }
+  .manual-row button { background: var(--accent); border: none; color: white; border-radius: 10px; padding: 11px 16px; font-size: 17px; font-weight: 700; cursor: pointer; flex-shrink: 0; }
   .manual-row button:disabled { opacity: 0.3; }
 
-  .status {
-    text-align: center;
-    font-size: 13px;
-    color: var(--muted);
-    padding: 4px 0;
-    min-height: 24px;
-  }
-
-  .spinner {
-    display: inline-block;
-    width: 14px; height: 14px;
-    border: 2px solid var(--border);
-    border-top-color: var(--accent);
-    border-radius: 50%;
-    animation: spin 0.7s linear infinite;
-    vertical-align: middle;
-    margin-right: 6px;
-  }
-
+  .status { text-align: center; font-size: 13px; color: var(--muted); min-height: 20px; }
+  .spinner { display: inline-block; width: 13px; height: 13px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: middle; margin-right: 5px; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  /* RESULT BOX */
-  .result-box {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 16px;
-    display: none;
-    gap: 10px;
-    flex-direction: column;
-  }
+  /* RESULT CARD */
+  .result-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; display: none; }
+  .result-card.visible { display: block; }
+  .result-card.found { border-color: var(--green); }
+  .result-card.not-found { border-color: var(--red); }
+  .result-card.no-list { border-color: var(--accent); }
 
-  .result-box.visible { display: flex; }
-  .result-box.found { border-color: var(--green); }
-  .result-box.not-found { border-color: var(--red); }
-  .result-box.serial-only { border-color: var(--accent); }
+  .card-header { padding: 14px 14px 10px; border-bottom: 1px solid var(--border); }
+  .card-product { font-size: 17px; font-weight: 700; line-height: 1.2; margin-bottom: 2px; }
+  .card-desc { font-size: 12px; color: var(--muted); }
 
-  .result-item-name {
-    font-size: 18px;
-    font-weight: 700;
-    color: var(--text);
-    line-height: 1.3;
-  }
+  .card-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); }
+  .card-field { background: var(--surface); padding: 10px 13px; }
+  .card-field.full { grid-column: 1 / -1; }
+  .field-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.7px; color: var(--muted); margin-bottom: 2px; }
+  .field-val { font-size: 13px; font-weight: 600; font-family: 'SF Mono', monospace; word-break: break-all; }
+  .field-val.sh { color: var(--accent); font-size: 16px; }
+  .field-val.muted { color: var(--muted); font-weight: 400; }
+  .field-val.notes { color: var(--yellow); font-family: -apple-system, sans-serif; font-size: 12px; font-weight: 400; white-space: pre-wrap; }
 
-  .result-item-name.none { color: var(--muted); font-size: 14px; font-weight: 400; }
+  .repair-row { padding: 12px 14px; display: flex; align-items: center; gap: 10px; border-top: 1px solid var(--border); background: #1f1500; }
+  .repair-row label { font-size: 13px; font-weight: 600; color: var(--yellow); cursor: pointer; flex: 1; }
+  .repair-checkbox { width: 20px; height: 20px; accent-color: var(--accent); cursor: pointer; }
 
-  .result-fields {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-  }
+  .card-actions { padding: 10px 14px; border-top: 1px solid var(--border); display: flex; gap: 8px; }
+  .btn-add { flex: 1; background: var(--accent); border: none; color: white; border-radius: 9px; padding: 10px; font-size: 13px; font-weight: 600; cursor: pointer; }
+  .btn-add:active { opacity: 0.8; }
 
-  .result-field {
-    background: var(--bg);
-    border-radius: 10px;
-    padding: 10px 12px;
-  }
+  /* SESSION LIST */
+  .session-section { padding: 14px 16px 4px; }
+  .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .section-title { font-size: 12px; text-transform: uppercase; letter-spacing: 0.7px; color: var(--muted); font-weight: 600; }
+  .btn-clear { background: none; border: none; color: var(--muted); font-size: 12px; cursor: pointer; padding: 2px 6px; }
 
-  .field-label {
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    color: var(--muted);
-    margin-bottom: 3px;
-  }
+  .session-list { display: flex; flex-direction: column; gap: 6px; padding: 0 16px 16px; }
+  .session-item { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; display: flex; align-items: center; gap: 10px; }
+  .session-item.repair-flagged { border-color: var(--yellow); }
+  .item-info { flex: 1; min-width: 0; }
+  .item-product { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .item-meta { font-size: 11px; color: var(--muted); margin-top: 1px; font-family: monospace; }
+  .item-repair-badge { background: var(--yellow); color: #000; font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 20px; flex-shrink: 0; }
+  .item-repair-check { width: 18px; height: 18px; accent-color: var(--accent); cursor: pointer; flex-shrink: 0; }
 
-  .field-value {
-    font-size: 14px;
-    font-weight: 700;
-    font-family: 'SF Mono', monospace;
-    color: var(--green);
-    word-break: break-all;
-  }
+  /* EXPORT TAB */
+  .export-area { padding: 16px; display: flex; flex-direction: column; gap: 12px; flex: 1; }
+  .export-filter { display: flex; gap: 6px; }
+  .filter-btn { flex: 1; background: var(--surface); border: 1px solid var(--border); color: var(--muted); border-radius: 9px; padding: 10px 8px; font-size: 12px; font-weight: 600; cursor: pointer; text-align: center; }
+  .filter-btn.active { border-color: var(--accent); color: var(--accent); background: #1a0f00; }
 
-  .field-value.muted { color: var(--muted); font-weight: 400; font-size: 12px; }
+  .export-preview { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; flex: 1; overflow-y: auto; min-height: 200px; }
+  .export-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+  .export-table th { background: var(--surface2); color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; font-size: 10px; padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--border); position: sticky; top: 0; }
+  .export-table td { padding: 8px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  .export-table tr:last-child td { border-bottom: none; }
+  .export-table tr.repair td { background: #1a1200; }
+  .empty-export { padding: 40px 20px; text-align: center; color: var(--muted); font-size: 13px; }
 
-  .result-actions {
-    display: flex;
-    gap: 8px;
-  }
+  .export-btns { display: flex; gap: 8px; }
+  .btn-export { flex: 1; border: none; border-radius: 10px; padding: 13px; font-size: 14px; font-weight: 600; cursor: pointer; }
+  .btn-export.csv { background: var(--surface); border: 1px solid var(--accent); color: var(--accent); }
+  .btn-export.pdf { background: var(--accent); color: white; }
 
-  .copy-btn {
-    flex: 1;
-    background: var(--accent);
-    border: none;
-    color: white;
-    padding: 10px;
-    border-radius: 10px;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-  }
-
-  .copy-btn.secondary {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    color: var(--text);
-  }
-
-  .raw-serials {
-    font-size: 11px;
-    color: var(--muted);
-    line-height: 1.8;
-    border-top: 1px solid var(--border);
-    padding-top: 10px;
-  }
+  /* UNKNOWN TAB */
+  .unknown-area { padding: 14px 16px 4px; }
+  .unknown-list { display: flex; flex-direction: column; gap: 6px; padding: 0 16px 16px; }
+  .unknown-item { background: #1a0505; border: 1px solid var(--red); border-radius: 10px; padding: 10px 12px; display: flex; align-items: center; gap: 10px; }
+  .unknown-query { font-size: 14px; font-weight: 700; font-family: 'SF Mono', monospace; color: var(--red); flex: 1; word-break: break-all; }
+  .unknown-time { font-size: 10px; color: var(--muted); flex-shrink: 0; }
+  .unknown-badge { background: var(--red); color: white; font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 20px; flex-shrink: 0; }
+  .unknown-note { background: var(--bg); border: 1px solid var(--border); border-radius: 7px; color: var(--text); font-size: 12px; padding: 6px 9px; margin-top: 6px; width: 100%; font-family: -apple-system, sans-serif; }
+  .unknown-note:focus { outline: none; border-color: var(--accent); }
+  .unknown-note::placeholder { color: var(--muted); }
 
   /* GEAR LIST TAB */
-  .list-area {
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    flex: 1;
-  }
-
-  .list-area p {
-    font-size: 13px;
-    color: var(--muted);
-    line-height: 1.6;
-  }
-
-  .list-area p code {
-    background: var(--surface);
-    padding: 1px 5px;
-    border-radius: 4px;
-    font-family: 'SF Mono', monospace;
-    font-size: 12px;
-    color: var(--accent2);
-  }
-
-  textarea {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    color: var(--text);
-    font-family: 'SF Mono', 'Courier New', monospace;
-    font-size: 12px;
-    line-height: 1.6;
-    padding: 14px;
-    resize: vertical;
-    min-height: 200px;
-    flex: 1;
-  }
-
+  .list-area { padding: 16px; display: flex; flex-direction: column; gap: 10px; flex: 1; }
+  .list-area p { font-size: 12px; color: var(--muted); line-height: 1.6; }
+  .list-area p code { background: var(--surface); padding: 1px 5px; border-radius: 4px; font-family: 'SF Mono', monospace; font-size: 11px; color: #fb923c; }
+  textarea { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; color: var(--text); font-family: 'SF Mono', monospace; font-size: 11px; line-height: 1.6; padding: 12px; resize: none; flex: 1; min-height: 180px; }
   textarea:focus { outline: none; border-color: var(--accent); }
-
-  .btn-save {
-    background: var(--surface);
-    border: 1px solid var(--accent);
-    color: var(--accent);
-    border-radius: 12px;
-    padding: 13px;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-  }
-
-  .gear-count {
-    font-size: 12px;
-    color: var(--green);
-    text-align: center;
-  }
+  .btn-save { background: var(--surface); border: 1px solid var(--accent); color: var(--accent); border-radius: 10px; padding: 12px; font-size: 14px; font-weight: 600; cursor: pointer; }
+  .gear-count { font-size: 12px; color: var(--green); text-align: center; }
 </style>
 </head>
 <body>
 
 <header>
   <div class="logo">🔍</div>
-  <h1>SH Lookup <span>by Orms</span></h1>
+  <h1>SH Lookup <span>· Orms</span></h1>
+  <div class="header-right">
+    <div class="session-badge">Session: <span id="session-count">0</span></div>
+  </div>
 </header>
 
 <div class="tab-bar">
   <button class="active" onclick="switchTab('scan')">📷 Scan</button>
-  <button onclick="switchTab('list')">📋 Gear List</button>
+  <button onclick="switchTab('session')">📋 List</button>
+  <button onclick="switchTab('export')">📤 Export</button>
+  <button onclick="switchTab('unknown')" id="tab-btn-unknown">❓ Unknown</button>
+  <button onclick="switchTab('list')">⚙️ Gear</button>
 </div>
 
 <!-- SCAN TAB -->
@@ -357,7 +159,7 @@
     <div id="preview-wrap">
       <div class="placeholder">
         <span class="icon">📷</span>
-        <span>Take a photo of the serial number</span>
+        <span>Photo or type to look up</span>
       </div>
     </div>
 
@@ -367,33 +169,105 @@
     <input type="file" id="file-input" accept="image/*" capture="environment" onchange="handleImage(this)">
 
     <div class="manual-row">
-      <input type="text" id="manual-input" placeholder="Type serial or SH number…" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" oninput="onManualInput()" onkeydown="if(event.key==='Enter')manualLookup()">
+      <input type="text" id="manual-input" placeholder="Type SH or serial number…" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" oninput="onManualInput()" onkeydown="if(event.key==='Enter')manualLookup()">
       <button id="manual-btn" onclick="manualLookup()" disabled>→</button>
     </div>
 
     <div id="status" class="status"></div>
 
-    <div id="result-box" class="result-box">
-      <div id="result-item-name" class="result-item-name">—</div>
-
-      <div class="result-fields">
-        <div class="result-field">
+    <!-- RESULT CARD -->
+    <div id="result-card" class="result-card">
+      <div class="card-header">
+        <div id="card-product" class="card-product">—</div>
+        <div id="card-desc" class="card-desc"></div>
+      </div>
+      <div class="card-fields">
+        <div class="card-field">
           <div class="field-label">SH Number</div>
-          <div id="field-sh" class="field-value muted">—</div>
+          <div id="card-sh" class="field-val sh">—</div>
         </div>
-        <div class="result-field">
-          <div class="field-label">Serial Number</div>
-          <div id="field-serial" class="field-value muted">—</div>
+        <div class="card-field">
+          <div class="field-label">Serial</div>
+          <div id="card-serial" class="field-val">—</div>
+        </div>
+        <div class="card-field">
+          <div class="field-label">OS Doc</div>
+          <div id="card-osdoc" class="field-val">—</div>
+        </div>
+        <div class="card-field">
+          <div class="field-label">Shutter</div>
+          <div id="card-shutter" class="field-val">—</div>
+        </div>
+        <div class="card-field">
+          <div class="field-label">Rating</div>
+          <div id="card-rating" class="field-val">—</div>
+        </div>
+        <div id="notes-field" class="card-field full" style="display:none">
+          <div class="field-label">⚠️ Notes</div>
+          <div id="card-notes" class="field-val notes"></div>
         </div>
       </div>
-
-      <div id="result-actions" class="result-actions" style="display:none">
-        <button class="copy-btn" onclick="copyField('sh')">Copy SH</button>
-        <button class="copy-btn secondary" onclick="copyField('serial')">Copy Serial</button>
+      <div id="repair-row" class="repair-row" style="display:none">
+        <label for="repair-check">🔧 Flag for repair</label>
+        <input type="checkbox" id="repair-check" class="repair-checkbox">
       </div>
-
-      <div id="raw-serials" class="raw-serials" style="display:none"></div>
+      <div class="card-actions">
+        <button class="btn-add" onclick="addToSession()">+ Add to Session List</button>
+      </div>
     </div>
+  </div>
+</div>
+
+<!-- SESSION LIST TAB -->
+<div id="tab-session" class="tab-content">
+  <div class="session-section">
+    <div class="section-header">
+      <div class="section-title">Scanned this session</div>
+      <button class="btn-clear" onclick="clearSession()">Clear all</button>
+    </div>
+  </div>
+  <div id="session-list" class="session-list">
+    <div style="text-align:center;color:var(--muted);font-size:13px;padding:30px">Nothing scanned yet</div>
+  </div>
+</div>
+
+<!-- EXPORT TAB -->
+<div id="tab-export" class="tab-content">
+  <div class="export-area">
+    <div class="export-filter">
+      <div class="filter-btn active" id="filter-all" onclick="setFilter('all')">All Items</div>
+      <div class="filter-btn" id="filter-repair" onclick="setFilter('repair')">🔧 Repairs Only</div>
+    </div>
+    <div class="export-preview">
+      <table class="export-table" id="export-table">
+        <thead>
+          <tr>
+            <th>SH</th><th>Serial</th><th>OS Doc</th><th>Product</th><th>Rating</th><th>Notes</th>
+          </tr>
+        </thead>
+        <tbody id="export-body">
+          <tr><td colspan="6" class="empty-export">No items in session</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="export-btns">
+      <button class="btn-export csv" onclick="exportCSV()">⬇ CSV</button>
+      <button class="btn-export pdf" onclick="exportPDF()">⬇ PDF</button>
+    </div>
+  </div>
+</div>
+
+<!-- UNKNOWN TAB -->
+<div id="tab-unknown" class="tab-content">
+  <div class="unknown-area">
+    <div class="section-header">
+      <div class="section-title">Not found in gear list</div>
+      <button class="btn-clear" onclick="clearUnknown()">Clear all</button>
+    </div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.5">Items scanned that couldn't be matched — check the database or allocate an SH number.</div>
+  </div>
+  <div id="unknown-list" class="unknown-list">
+    <div style="text-align:center;color:var(--muted);font-size:13px;padding:30px">No unmatched scans yet</div>
   </div>
 </div>
 
@@ -401,52 +275,60 @@
 <div id="tab-list" class="tab-content">
   <div class="list-area">
     <p>
-      Paste your gear list — one item per line:<br>
-      <code>SH00123, SERIAL, Item Name</code><br><br>
-      Serial and SH are required. Item name is optional but recommended. You can also search by SH number.
+      One item per line — columns in order:<br>
+      <code>SH, Serial, OS Doc, Product, Description, Shutter, Rating, Notes</code><br><br>
+      SH and Serial are required. All other columns optional. You can paste a CSV export directly.
     </p>
-    <textarea id="gear-input" placeholder="e.g.
-SH00123, SN1234567, Canon EOS R5
-SH00456, SN9876543, Sony 70-200mm f/2.8
-SH00789, ABC123XYZ"></textarea>
+    <textarea id="gear-input" placeholder="SH00123, SN1234567, OSD001, Canon EOS R5, Full-frame mirrorless, 12500, A, Needs sensor clean
+SH00456, SN9876543, OSD002, Sony 70-200mm, f/2.8 G Master, , B,"></textarea>
     <button class="btn-save" onclick="saveList()">✓ Save Gear List</button>
     <div id="gear-count" class="gear-count"></div>
   </div>
 </div>
 
 <script>
-const ANTHROPIC_API = "https://api.anthropic.com/v1/messages";
+const API = "https://api.anthropic.com/v1/messages";
+const COLS = ['sh','serial','osdoc','product','desc','shutter','rating','notes'];
 
-// Each entry: { serial, sh, item }
-// Lookup maps: serialMap[SERIAL] -> entry, shMap[SH] -> entry
-let serialMap = {};
-let shMap = {};
-let entries = [];
+// Data
+let entries = []; // gear list
+let shMap = {}, serialMap = {};
+let session = []; // scanned items this session
+let unknown = []; // unmatched scans
+let currentMatch = null;
+let exportFilter = 'all';
 
+// ── LOAD / SAVE ──────────────────────────────────────────
 function loadSaved() {
   try {
-    const saved = localStorage.getItem('orms-sh-gear-v2');
-    if (saved) {
-      entries = JSON.parse(saved);
-      buildMaps();
-      updateGearCount();
-      rebuildTextarea();
-    }
+    const g = localStorage.getItem('orms-gear-v3');
+    if (g) { entries = JSON.parse(g); buildMaps(); updateGearCount(); rebuildTextarea(); }
+    const s = localStorage.getItem('orms-session-v1');
+    if (s) { session = JSON.parse(s); renderSession(); renderExport(); }
+    const u = localStorage.getItem('orms-unknown-v1');
+    if (u) { unknown = JSON.parse(u); renderUnknown(); }
   } catch(e) {}
 }
 
 function buildMaps() {
-  serialMap = {};
-  shMap = {};
+  shMap = {}; serialMap = {};
   entries.forEach(e => {
-    if (e.serial) serialMap[e.serial.toUpperCase().replace(/\s/g,'')] = e;
-    if (e.sh) shMap[e.sh.toUpperCase().replace(/\s/g,'')] = e;
+    if (e.sh) shMap[norm(e.sh)] = e;
+    if (e.serial) serialMap[norm(e.serial)] = e;
   });
 }
 
+function norm(s) { return (s||'').toUpperCase().replace(/[\s\-]/g,''); }
+
+function saveSession() {
+  localStorage.setItem('orms-session-v1', JSON.stringify(session));
+  document.getElementById('session-count').textContent = session.length;
+}
+
 function rebuildTextarea() {
-  const lines = entries.map(e => [e.sh, e.serial, e.item].filter(Boolean).join(', ')).join('\n');
-  document.getElementById('gear-input').value = lines;
+  document.getElementById('gear-input').value = entries.map(e =>
+    COLS.map(c => e[c]||'').join(', ')
+  ).join('\n');
 }
 
 function updateGearCount() {
@@ -456,187 +338,320 @@ function updateGearCount() {
 function saveList() {
   const raw = document.getElementById('gear-input').value.trim();
   if (!raw) return;
-  entries = [];
-  raw.split('\n').forEach(line => {
-    const parts = line.split(/[,\t]+/).map(p => p.trim()).filter(Boolean);
-    if (parts.length >= 2) {
-      entries.push({
-        sh: parts[0] || '',
-        serial: parts[1] || '',
-        item: parts[2] || ''
-      });
-    }
-  });
+  entries = raw.split('\n').map(line => {
+    const p = line.split(/,/).map(x => x.trim());
+    return { sh: p[0]||'', serial: p[1]||'', osdoc: p[2]||'', product: p[3]||'', desc: p[4]||'', shutter: p[5]||'', rating: p[6]||'', notes: p[7]||'' };
+  }).filter(e => e.sh || e.serial);
   buildMaps();
-  localStorage.setItem('orms-sh-gear-v2', JSON.stringify(entries));
+  localStorage.setItem('orms-gear-v3', JSON.stringify(entries));
   updateGearCount();
   document.getElementById('gear-count').textContent = `✓ ${entries.length} items saved`;
   switchTab('scan');
 }
 
+// ── TABS ─────────────────────────────────────────────────
 function switchTab(tab) {
   document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.tab-bar button').forEach(b => b.classList.remove('active'));
   document.getElementById('tab-' + tab).classList.add('active');
-  document.querySelector(`.tab-bar button[onclick*="${tab}"]`).classList.add('active');
+  const btn = document.querySelector(`.tab-bar button[onclick*="'${tab}'"]`);
+  if (btn) btn.classList.add('active');
+  if (tab === 'export') renderExport();
 }
 
+// ── SCAN / LOOKUP ─────────────────────────────────────────
 async function handleImage(input) {
   const file = input.files[0];
   if (!file) return;
-
   const reader = new FileReader();
   reader.onload = async (e) => {
     const b64 = e.target.result.split(',')[1];
     document.getElementById('preview-wrap').innerHTML = `<img src="${e.target.result}" alt="preview">`;
     setStatus('<span class="spinner"></span> Reading serial number…');
-    hideResult();
-
+    hideCard();
     try {
-      const detected = await extractSerials(b64, file.type);
-      showResult(detected);
-    } catch(err) {
-      setStatus('⚠️ ' + err.message);
-    }
+      const serials = await extractSerials(b64, file.type);
+      if (!serials.length) { setStatus('No serial found — try a clearer photo'); return; }
+      const match = serials.map(s => lookup(s)).find(Boolean);
+      showCard(match, serials[0]);
+    } catch(err) { setStatus('⚠️ ' + err.message); }
   };
   reader.readAsDataURL(file);
   input.value = '';
 }
 
 async function extractSerials(b64, mimeType) {
-  const resp = await fetch(ANTHROPIC_API, {
+  const resp = await fetch(API, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      model: 'claude-sonnet-4-6',
-      max_tokens: 500,
-      messages: [{
-        role: 'user',
-        content: [
-          { type: 'image', source: { type: 'base64', media_type: mimeType || 'image/jpeg', data: b64 } },
-          { type: 'text', text: `Extract ALL serial numbers visible in this image of camera/photography equipment. Serial numbers are alphanumeric strings on labels or engraved on the body.
-
-Respond ONLY with JSON (no markdown):
-{"serials": ["SN12345", "SN67890"]}
-
-If none visible: {"serials": []}
-Do not include label text like "S/N" or "Serial No" — only the number itself.` }
-        ]
-      }]
+      model: 'claude-sonnet-4-6', max_tokens: 400,
+      messages: [{ role: 'user', content: [
+        { type: 'image', source: { type: 'base64', media_type: mimeType||'image/jpeg', data: b64 } },
+        { type: 'text', text: 'Extract all serial numbers from this camera/photography equipment image. Return ONLY JSON, no markdown:\n{"serials":["SN123"]}\nIf none: {"serials":[]}\nOmit label text like S/N.' }
+      ]}]
     })
   });
-
-  if (!resp.ok) {
-    const err = await resp.json();
-    throw new Error(err.error?.message || 'API error');
-  }
-
+  if (!resp.ok) { const e = await resp.json(); throw new Error(e.error?.message||'API error'); }
   const data = await resp.json();
-  const text = data.content.map(c => c.text || '').join('');
-  const parsed = JSON.parse(text.replace(/```json|```/g, '').trim());
-  return parsed.serials || [];
+  const text = data.content.map(c=>c.text||'').join('');
+  return JSON.parse(text.replace(/```json|```/g,'').trim()).serials || [];
 }
 
 function lookup(query) {
-  const key = query.toUpperCase().replace(/\s/g,'');
-  return serialMap[key] || shMap[key] || null;
-}
-
-function showResult(detectedSerials) {
-  setStatus('');
-  const box = document.getElementById('result-box');
-  const nameEl = document.getElementById('result-item-name');
-  const shEl = document.getElementById('field-sh');
-  const serialEl = document.getElementById('field-serial');
-  const actionsEl = document.getElementById('result-actions');
-  const rawEl = document.getElementById('raw-serials');
-  const hasGear = entries.length > 0;
-
-  // Try to find match from detected serials
-  let match = null;
-  let primarySerial = detectedSerials[0] || '';
-
-  for (const s of detectedSerials) {
-    match = lookup(s);
-    if (match) { primarySerial = s; break; }
-  }
-
-  box.className = 'result-box visible ' + (match ? 'found' : (hasGear ? 'not-found' : 'serial-only'));
-
-  if (match) {
-    nameEl.className = 'result-item-name';
-    nameEl.textContent = match.item || 'Item found';
-    shEl.className = 'field-value';
-    shEl.textContent = match.sh || '—';
-    serialEl.className = 'field-value';
-    serialEl.textContent = match.serial || primarySerial;
-    actionsEl.style.display = 'flex';
-    actionsEl.dataset.sh = match.sh || '';
-    actionsEl.dataset.serial = match.serial || primarySerial;
-  } else if (!detectedSerials.length) {
-    nameEl.className = 'result-item-name none';
-    nameEl.textContent = 'No serial number detected — try a clearer photo';
-    shEl.className = 'field-value muted'; shEl.textContent = '—';
-    serialEl.className = 'field-value muted'; serialEl.textContent = '—';
-    actionsEl.style.display = 'none';
-  } else {
-    nameEl.className = 'result-item-name none';
-    nameEl.textContent = hasGear ? 'Not found in gear list' : 'Add gear list to look up SH & item';
-    shEl.className = 'field-value muted'; shEl.textContent = hasGear ? '—' : 'No list';
-    serialEl.className = 'field-value'; serialEl.textContent = primarySerial;
-    actionsEl.style.display = hasGear ? 'none' : 'none';
-  }
-
-  // Show all if multiple detected
-  if (detectedSerials.length > 1) {
-    rawEl.style.display = 'block';
-    rawEl.innerHTML = '<strong style="color:var(--muted)">All detected:</strong> ' +
-      detectedSerials.map(s => {
-        const m = lookup(s);
-        return `<span style="color:var(--text);font-family:monospace">${s}</span>${m ? ` → <span style="color:var(--green)">${m.sh}</span>` : ''}`;
-      }).join(' &nbsp;·&nbsp; ');
-  } else {
-    rawEl.style.display = 'none';
-  }
-}
-
-function hideResult() {
-  document.getElementById('result-box').className = 'result-box';
-}
-
-function setStatus(html) {
-  document.getElementById('status').innerHTML = html;
-}
-
-let currentSH = '';
-let currentSerial = '';
-
-function copyField(field) {
-  const actionsEl = document.getElementById('result-actions');
-  const val = field === 'sh' ? actionsEl.dataset.sh : actionsEl.dataset.serial;
-  if (!val) return;
-  navigator.clipboard.writeText(val).then(() => {
-    const btns = actionsEl.querySelectorAll('.copy-btn');
-    const btn = field === 'sh' ? btns[0] : btns[1];
-    const orig = btn.textContent;
-    btn.textContent = '✓ Copied';
-    setTimeout(() => btn.textContent = orig, 1500);
-  });
-}
-
-function onManualInput() {
-  const val = document.getElementById('manual-input').value.trim();
-  document.getElementById('manual-btn').disabled = val.length === 0;
+  const k = norm(query);
+  return shMap[k] || serialMap[k] || null;
 }
 
 function manualLookup() {
   const val = document.getElementById('manual-input').value.trim();
   if (!val) return;
-  showResult([val]);
+  const match = lookup(val);
+  showCard(match, val);
   document.getElementById('manual-input').blur();
 }
 
+function onManualInput() {
+  document.getElementById('manual-btn').disabled = !document.getElementById('manual-input').value.trim();
+}
+
+// ── CARD ──────────────────────────────────────────────────
+function showCard(match, rawQuery) {
+  setStatus('');
+  const card = document.getElementById('result-card');
+  currentMatch = match;
+
+  if (match) {
+    card.className = 'result-card visible found';
+    document.getElementById('card-product').textContent = match.product || 'Unknown item';
+    document.getElementById('card-desc').textContent = match.desc || '';
+    document.getElementById('card-sh').textContent = match.sh || '—';
+    document.getElementById('card-serial').textContent = match.serial || rawQuery;
+    document.getElementById('card-osdoc').textContent = match.osdoc || '—';
+    document.getElementById('card-shutter').textContent = match.shutter || '—';
+    document.getElementById('card-rating').textContent = match.rating || '—';
+
+    const hasNotes = match.notes && match.notes.trim();
+    document.getElementById('notes-field').style.display = hasNotes ? 'block' : 'none';
+    document.getElementById('card-notes').textContent = match.notes || '';
+    document.getElementById('repair-row').style.display = hasNotes ? 'flex' : 'none';
+    document.getElementById('repair-check').checked = false;
+  } else {
+    card.className = 'result-card visible not-found';
+    const hasGear = entries.length > 0;
+    document.getElementById('card-product').textContent = hasGear ? 'Not found in gear list' : 'No gear list loaded';
+    document.getElementById('card-desc').textContent = rawQuery;
+    document.getElementById('card-sh').textContent = '—';
+    document.getElementById('card-serial').textContent = rawQuery;
+    document.getElementById('card-osdoc').textContent = '—';
+    document.getElementById('card-shutter').textContent = '—';
+    document.getElementById('card-rating').textContent = '—';
+    document.getElementById('notes-field').style.display = 'none';
+    document.getElementById('repair-row').style.display = 'none';
+    // Auto-log to Unknown tab
+    if (hasGear) addToUnknown(rawQuery);
+  }
+}
+
+function saveUnknown() {
+  localStorage.setItem('orms-unknown-v1', JSON.stringify(unknown));
+  const btn = document.getElementById('tab-btn-unknown');
+  btn.textContent = unknown.length ? `❓ Unknown (${unknown.length})` : '❓ Unknown';
+  btn.style.color = unknown.length ? 'var(--red)' : '';
+}
+
+function renderUnknown() {
+  const el = document.getElementById('unknown-list');
+  const btn = document.getElementById('tab-btn-unknown');
+  btn.textContent = unknown.length ? `❓ Unknown (${unknown.length})` : '❓ Unknown';
+  btn.style.color = unknown.length ? 'var(--red)' : '';
+  if (!unknown.length) {
+    el.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:13px;padding:30px">No unmatched scans yet</div>';
+    return;
+  }
+  el.innerHTML = unknown.map((item, i) => `
+    <div class="unknown-item">
+      <div style="flex:1;min-width:0">
+        <div class="unknown-query">${item.query}</div>
+        <input class="unknown-note" placeholder="Type what this is…" value="${(item.note||'').replace(/"/g,'&quot;')}" onchange="updateUnknownNote(${i}, this.value)" onblur="updateUnknownNote(${i}, this.value)">
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0">
+        <div class="unknown-time">${new Date(item.at).toLocaleTimeString('en-ZA', {hour:'2-digit',minute:'2-digit'})}</div>
+        <button class="unknown-remove" onclick="removeUnknown(${i})" title="Remove">✕</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function updateUnknownNote(i, val) {
+  unknown[i].note = val;
+  localStorage.setItem('orms-unknown-v1', JSON.stringify(unknown));
+}
+
+function removeUnknown(i) {
+  unknown.splice(i, 1);
+  saveUnknown();
+  renderUnknown();
+}
+
+function clearUnknown() {
+  if (!unknown.length) return;
+  if (!confirm('Clear all unmatched items?')) return;
+  unknown = [];
+  saveUnknown();
+  renderUnknown();
+}
+
+function addToUnknown(query) {
+  // Avoid duplicates
+  if (unknown.find(u => u.query.toUpperCase() === query.toUpperCase())) return;
+  unknown.unshift({ query, at: Date.now() });
+  saveUnknown();
+  renderUnknown();
+}
+
+function addToSession() {
+  if (!currentMatch && !document.getElementById('card-serial').textContent) return;
+  const repair = document.getElementById('repair-check').checked;
+  const item = currentMatch
+    ? { ...currentMatch, repair, addedAt: Date.now() }
+    : { sh:'—', serial: document.getElementById('card-serial').textContent, product:'Unknown', repair, addedAt: Date.now() };
+
+  // Avoid exact duplicate serials
+  const existing = session.findIndex(s => norm(s.serial) === norm(item.serial) && norm(s.sh) === norm(item.sh));
+  if (existing >= 0) session[existing] = item;
+  else session.unshift(item);
+
+  saveSession();
+  renderSession();
+  setStatus('✓ Added to session list');
+  setTimeout(() => setStatus(''), 1500);
+}
+
+function setStatus(html) { document.getElementById('status').innerHTML = html; }
+
+// ── SESSION LIST ──────────────────────────────────────────
+function renderSession() {
+  const el = document.getElementById('session-list');
+  document.getElementById('session-count').textContent = session.length;
+  if (!session.length) {
+    el.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:13px;padding:30px">Nothing scanned yet</div>';
+    return;
+  }
+  el.innerHTML = session.map((item, i) => `
+    <div class="session-item ${item.repair ? 'repair-flagged' : ''}" id="si-${i}">
+      <div class="item-info">
+        <div class="item-product">${item.product || 'Unknown'}</div>
+        <div class="item-meta">${item.sh || '—'} · ${item.serial || '—'}</div>
+      </div>
+      ${item.notes ? `<input type="checkbox" class="item-repair-check" ${item.repair?'checked':''} onchange="toggleRepair(${i}, this.checked)" title="Flag for repair">` : ''}
+      ${item.repair ? '<span class="item-repair-badge">REPAIR</span>' : ''}
+    </div>
+  `).join('');
+}
+
+function toggleRepair(i, val) {
+  session[i].repair = val;
+  saveSession();
+  renderSession();
+  renderExport();
+}
+
+function clearSession() {
+  if (!confirm('Clear all scanned items?')) return;
+  session = [];
+  saveSession();
+  renderSession();
+  renderExport();
+}
+
+// ── EXPORT ────────────────────────────────────────────────
+function setFilter(f) {
+  exportFilter = f;
+  document.getElementById('filter-all').className = 'filter-btn' + (f==='all'?' active':'');
+  document.getElementById('filter-repair').className = 'filter-btn' + (f==='repair'?' active':'');
+  renderExport();
+}
+
+function getFiltered() {
+  return exportFilter === 'repair' ? session.filter(s => s.repair) : session;
+}
+
+function renderExport() {
+  const rows = getFiltered();
+  const tbody = document.getElementById('export-body');
+  if (!rows.length) {
+    tbody.innerHTML = '<tr><td colspan="6" class="empty-export">No items to export</td></tr>';
+    return;
+  }
+  tbody.innerHTML = rows.map(item => `
+    <tr class="${item.repair?'repair':''}">
+      <td>${item.sh||'—'}</td>
+      <td>${item.serial||'—'}</td>
+      <td>${item.osdoc||'—'}</td>
+      <td>${item.product||'—'}</td>
+      <td>${item.rating||'—'}</td>
+      <td>${item.notes||''}</td>
+    </tr>
+  `).join('');
+}
+
+function exportCSV() {
+  const rows = getFiltered();
+  if (!rows.length) return;
+  const headers = ['SH','Serial','OS Doc','Product','Description','Shutter','Rating','Notes','Repair Flag'];
+  const lines = [headers.join(',')];
+  rows.forEach(item => {
+    lines.push([item.sh,item.serial,item.osdoc,item.product,item.desc,item.shutter,item.rating,item.notes,item.repair?'YES':''].map(v=>`"${(v||'').replace(/"/g,'""')}"`).join(','));
+  });
+  const blob = new Blob([lines.join('\n')], {type:'text/csv'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `orms-${exportFilter}-${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+}
+
+function exportPDF() {
+  const rows = getFiltered();
+  if (!rows.length) return;
+  const title = exportFilter === 'repair' ? 'Repair Items' : 'Scanned Items';
+  const date = new Date().toLocaleDateString('en-ZA');
+  const tableRows = rows.map(item => `
+    <tr style="${item.repair?'background:#fff8e1':''}">
+      <td>${item.sh||'—'}</td>
+      <td>${item.serial||'—'}</td>
+      <td>${item.osdoc||'—'}</td>
+      <td>${item.product||'—'}</td>
+      <td>${item.rating||'—'}</td>
+      <td>${item.notes||''}</td>
+      <td style="text-align:center">${item.repair?'✓':''}</td>
+    </tr>`).join('');
+
+  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8">
+  <style>
+    body{font-family:Arial,sans-serif;font-size:11px;margin:20px;color:#111}
+    h2{font-size:16px;margin-bottom:2px}
+    .sub{color:#666;font-size:11px;margin-bottom:16px}
+    table{width:100%;border-collapse:collapse}
+    th{background:#333;color:#fff;padding:6px 8px;text-align:left;font-size:10px}
+    td{padding:5px 8px;border-bottom:1px solid #ddd;vertical-align:top}
+    .repair-badge{background:#f59e0b;color:#000;padding:1px 6px;border-radius:10px;font-size:9px;font-weight:bold}
+  </style></head><body>
+  <h2>Orms Used Gear — ${title}</h2>
+  <div class="sub">Exported ${date} · ${rows.length} item${rows.length!==1?'s':''}</div>
+  <table><thead><tr><th>SH</th><th>Serial</th><th>OS Doc</th><th>Product</th><th>Rating</th><th>Notes</th><th>Repair</th></tr></thead>
+  <tbody>${tableRows}</tbody></table>
+  </body></html>`;
+
+  const win = window.open('','_blank');
+  win.document.write(html);
+  win.document.close();
+  win.print();
+}
+
+// ── INIT ─────────────────────────────────────────────────
 loadSaved();
+renderUnknown();
 </script>
 </body>
 </html>
