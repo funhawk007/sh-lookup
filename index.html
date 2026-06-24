@@ -496,27 +496,82 @@ function switchTab(tab) {
 }
 
 // ── CSV UPLOAD ────────────────────────────────────────────
+
+// Proper CSV line parser — handles quoted fields with commas inside
+function parseCSVLine(line) {
+  const result = [];
+  let cur = '', inQuote = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (ch === '"') {
+      if (inQuote && line[i+1] === '"') { cur += '"'; i++; } // escaped quote
+      else inQuote = !inQuote;
+    } else if (ch === ',' && !inQuote) {
+      result.push(cur.trim()); cur = '';
+    } else {
+      cur += ch;
+    }
+  }
+  result.push(cur.trim());
+  return result;
+}
+
+// Extract SH number from a description string like "S/H SH10216 CANON EOS..."
+function extractSH(desc) {
+  const m = desc.match(/\bSH\d+\b/i);
+  return m ? m[0].toUpperCase() : '';
+}
+
 function handleCSVUpload(input) {
   const file = input.files[0]; if (!file) return;
   const reader = new FileReader();
   reader.onload = (e) => {
     const text = e.target.result;
-    const lines = text.trim().split('\n');
+    const rawLines = text.trim().split(/\r?\n/);
     let entries = [];
     let startIdx = 0;
 
     // Detect and skip header row
-    const firstLine = lines[0].toLowerCase();
-    if (firstLine.includes('sh') || firstLine.includes('serial') || firstLine.includes('product')) startIdx = 1;
+    const firstLine = rawLines[0].toLowerCase();
+    // Skip header if first line contains known header words
+    if (firstLine.includes('os doc') || firstLine.includes('serial') || firstLine.includes('description') || firstLine.includes('shutter') || firstLine.includes('rating') || firstLine.includes('product') || firstLine.includes('sh')) startIdx = 1;
 
-    for (let i = startIdx; i < lines.length; i++) {
-      const p = lines[i].split(/,/).map(x => x.trim().replace(/^"|"$/g,''));
-      if (p.length < 2) continue;
-      const entry = { sh:p[0]||'', serial:p[1]||'', osdoc:p[2]||'', product:p[3]||'', desc:p[4]||'', shutter:p[5]||'', rating:p[6]||'', notes:p[7]||'' };
-      if (entry.sh || entry.serial) entries.push(entry);
+    // Column order: OS Doc, SH, Description, Serial, Shutter, Rating, Notes
+    let colOsDoc=0, colSH=1, colDesc=2, colSerial=3, colShutter=4, colRating=5, colNotes=6;
+    if (startIdx === 1) {
+      const hdr = parseCSVLine(rawLines[0].toLowerCase());
+      hdr.forEach((h, i) => {
+        const t = h.trim();
+        if (t.includes('os doc') || t === 'os') colOsDoc = i;
+        else if (t === 'sh' || t.includes('sh number') || t.includes('product')) colSH = i;
+        else if (t.includes('description') || t.includes('desc')) colDesc = i;
+        else if (t.includes('serial')) colSerial = i;
+        else if (t.includes('shutter')) colShutter = i;
+        else if (t.includes('rating')) colRating = i;
+        else if (t.includes('notes') || t.includes('note')) colNotes = i;
+      });
     }
 
-    if (!entries.length) { alert('No valid data found in this file. Make sure columns are: SH, Serial, OS Doc, Product, Description, Shutter, Rating, Notes'); return; }
+    for (let i = startIdx; i < rawLines.length; i++) {
+      const line = rawLines[i].trim();
+      if (!line) continue;
+      const p = parseCSVLine(line);
+      const osdoc   = p[colOsDoc]   || '';
+      const sh      = (p[colSH]     || '').trim();
+      const desc    = p[colDesc]    || '';
+      const serial  = p[colSerial]  || '';
+      const shutter = p[colShutter] || '';
+      const rating  = p[colRating]  || '';
+      const notes   = p[colNotes]   || '';
+
+      if (!serial && !sh && !osdoc) continue;
+      entries.push({ sh, serial, osdoc, product: sh, desc, shutter, rating, notes });
+    }
+
+    if (!entries.length) {
+      alert('No valid data found. Expected columns: OS Doc, SH, Description, Serial, Shutter, Rating, Notes');
+      return;
+    }
 
     uploads.push({
       id: 'upload_' + Date.now(),
