@@ -7,132 +7,180 @@
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
-    --bg: #0f0f0f; --surface: #1a1a1a; --surface2: #222;
-    --border: #2a2a2a; --accent: #f97316; --text: #f5f5f5;
-    --muted: #777; --green: #22c55e; --red: #ef4444; --yellow: #eab308;
+    --bg: #f0f2f5;
+    --surface: #ffffff;
+    --surface2: #f8f9fa;
+    --border: #e2e5ea;
+    --accent: #e8600a;
+    --accent-light: #fff3ed;
+    --text: #1a1a1a;
+    --muted: #8a8f98;
+    --green: #16a34a;
+    --green-light: #f0fdf4;
+    --red: #dc2626;
+    --red-light: #fef2f2;
+    --yellow: #b45309;
+    --yellow-light: #fffbeb;
   }
   body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; min-height: 100dvh; display: flex; flex-direction: column; }
 
   /* HEADER */
-  header { padding: 14px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
-  .logo { width: 30px; height: 30px; background: var(--accent); border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
+  header { background: var(--surface); padding: 14px 18px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+  .logo { width: 32px; height: 32px; background: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
   header h1 { font-size: 16px; font-weight: 700; letter-spacing: -0.3px; }
   header h1 span { color: var(--muted); font-weight: 400; font-size: 13px; }
   .header-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
-  .session-badge { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 4px 10px; font-size: 12px; color: var(--muted); }
+  .session-badge { background: var(--bg); border: 1px solid var(--border); border-radius: 20px; padding: 4px 12px; font-size: 12px; color: var(--muted); font-weight: 500; cursor: pointer; }
   .session-badge span { color: var(--accent); font-weight: 700; }
 
   /* TABS */
-  .tab-bar { display: flex; border-bottom: 1px solid var(--border); background: var(--bg); }
-  .tab-bar button { flex: 1; padding: 11px 6px; background: none; border: none; color: var(--muted); font-size: 12px; font-weight: 500; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; }
+  .tab-bar { display: flex; background: var(--surface); border-bottom: 1px solid var(--border); }
+  .tab-bar button { flex: 1; padding: 12px 4px; background: none; border: none; color: var(--muted); font-size: 11px; font-weight: 600; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; letter-spacing: 0.1px; }
   .tab-bar button.active { color: var(--accent); border-bottom-color: var(--accent); }
   .tab-content { display: none; flex: 1; flex-direction: column; overflow-y: auto; }
   .tab-content.active { display: flex; }
 
   /* SCAN TAB */
-  .scan-area { padding: 14px 16px 20px; display: flex; flex-direction: column; gap: 12px; }
-
-  #preview-wrap { background: var(--surface); border: 2px dashed var(--border); border-radius: 14px; min-height: 160px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-  #preview-wrap img { width: 100%; max-height: 240px; object-fit: contain; border-radius: 12px; }
+  .scan-area { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+  #preview-wrap { background: var(--surface); border: 2px dashed var(--border); border-radius: 16px; min-height: 150px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+  #preview-wrap img { width: 100%; max-height: 220px; object-fit: contain; border-radius: 14px; }
   .placeholder { display: flex; flex-direction: column; align-items: center; gap: 6px; color: var(--muted); font-size: 13px; }
-  .placeholder .icon { font-size: 32px; opacity: 0.35; }
-
-  .btn-capture { background: var(--accent); color: white; border: none; border-radius: 12px; padding: 14px; font-size: 15px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; -webkit-tap-highlight-color: transparent; }
-  .btn-capture:active { opacity: 0.8; }
+  .placeholder .icon { font-size: 30px; opacity: 0.4; }
+  .btn-capture { background: var(--accent); color: white; border: none; border-radius: 13px; padding: 15px; font-size: 15px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 2px 8px rgba(232,96,10,0.3); -webkit-tap-highlight-color: transparent; }
+  .btn-capture:active { opacity: 0.85; }
   #file-input { display: none; }
-
   .manual-row { display: flex; gap: 8px; }
-  .manual-row input { flex: 1; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; color: var(--text); font-size: 14px; font-family: 'SF Mono', monospace; padding: 11px 13px; letter-spacing: 0.3px; }
+  .manual-row input { flex: 1; background: var(--surface); border: 1.5px solid var(--border); border-radius: 11px; color: var(--text); font-size: 15px; font-family: 'SF Mono', monospace; padding: 12px 14px; letter-spacing: 0.5px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
   .manual-row input:focus { outline: none; border-color: var(--accent); }
-  .manual-row input::placeholder { color: var(--muted); font-family: -apple-system, sans-serif; letter-spacing: 0; }
-  .manual-row button { background: var(--accent); border: none; color: white; border-radius: 10px; padding: 11px 16px; font-size: 17px; font-weight: 700; cursor: pointer; flex-shrink: 0; }
-  .manual-row button:disabled { opacity: 0.3; }
-
-  .status { text-align: center; font-size: 13px; color: var(--muted); min-height: 20px; }
+  .manual-row input::placeholder { color: var(--muted); font-family: -apple-system, sans-serif; letter-spacing: 0; font-size: 14px; }
+  .manual-row button { background: var(--accent); border: none; color: white; border-radius: 11px; padding: 12px 18px; font-size: 18px; font-weight: 700; cursor: pointer; flex-shrink: 0; box-shadow: 0 2px 6px rgba(232,96,10,0.3); }
+  .manual-row button:disabled { opacity: 0.3; box-shadow: none; }
+  .status { text-align: center; font-size: 13px; color: var(--muted); min-height: 18px; }
   .spinner { display: inline-block; width: 13px; height: 13px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: middle; margin-right: 5px; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
   /* RESULT CARD */
-  .result-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; display: none; }
+  .result-card { background: var(--surface); border-radius: 18px; overflow: hidden; display: none; box-shadow: 0 2px 16px rgba(0,0,0,0.08); border: 1.5px solid var(--border); }
   .result-card.visible { display: block; }
-  .result-card.found { border-color: var(--green); }
-  .result-card.not-found { border-color: var(--red); }
-  .result-card.no-list { border-color: var(--accent); }
-
-  .card-header { padding: 14px 14px 10px; border-bottom: 1px solid var(--border); }
-  .card-product { font-size: 17px; font-weight: 700; line-height: 1.2; margin-bottom: 2px; }
-  .card-desc { font-size: 12px; color: var(--muted); }
-
-  .card-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); }
-  .card-field { background: var(--surface); padding: 10px 13px; }
+  .result-card.found { border-color: #bbf7d0; }
+  .result-card.not-found { border-color: #fecaca; }
+  .card-top { padding: 18px 18px 14px; border-bottom: 1px solid var(--border); }
+  .card-top.found-bg { background: var(--green-light); }
+  .card-top.notfound-bg { background: var(--red-light); }
+  .card-status-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .status-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .status-dot.green { background: var(--green); }
+  .status-dot.red { background: var(--red); }
+  .status-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; }
+  .status-label.green { color: var(--green); }
+  .status-label.red { color: var(--red); }
+  .card-product-name { font-size: 22px; font-weight: 800; color: var(--text); line-height: 1.2; letter-spacing: -0.5px; margin-bottom: 3px; }
+  .card-desc-text { font-size: 13px; color: var(--muted); }
+  .sh-hero { margin: 0 18px; padding: 14px 16px; background: var(--accent-light); border-left: 4px solid var(--accent); border-radius: 0 10px 10px 0; display: flex; align-items: center; justify-content: space-between; }
+  .sh-hero-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--accent); margin-bottom: 2px; }
+  .sh-hero-value { font-size: 30px; font-weight: 900; color: var(--accent); letter-spacing: -1px; font-family: 'SF Mono', monospace; }
+  .sh-copy-btn { background: var(--accent); color: white; border: none; border-radius: 9px; padding: 8px 14px; font-size: 12px; font-weight: 700; cursor: pointer; flex-shrink: 0; }
+  .card-fields { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1px; background: var(--border); margin-top: 1px; }
+  .card-field { background: var(--surface); padding: 12px 14px; }
   .card-field.full { grid-column: 1 / -1; }
-  .field-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.7px; color: var(--muted); margin-bottom: 2px; }
-  .field-val { font-size: 13px; font-weight: 600; font-family: 'SF Mono', monospace; word-break: break-all; }
-  .field-val.sh { color: var(--accent); font-size: 16px; }
-  .field-val.muted { color: var(--muted); font-weight: 400; }
-  .field-val.notes { color: var(--yellow); font-family: -apple-system, sans-serif; font-size: 12px; font-weight: 400; white-space: pre-wrap; }
+  .field-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; color: var(--muted); margin-bottom: 4px; }
+  .field-val { font-size: 14px; font-weight: 700; color: var(--text); font-family: 'SF Mono', monospace; word-break: break-all; }
+  .field-val.large { font-size: 18px; }
+  .field-val.muted { color: var(--muted); font-weight: 400; font-family: -apple-system, sans-serif; font-size: 13px; }
+  .field-val.notes-val { color: var(--yellow); font-family: -apple-system, sans-serif; font-size: 13px; font-weight: 500; white-space: pre-wrap; }
+  .repair-row { padding: 13px 18px; background: var(--yellow-light); border-top: 1px solid #fde68a; display: flex; align-items: center; gap: 12px; }
+  .repair-row label { font-size: 14px; font-weight: 600; color: var(--yellow); cursor: pointer; flex: 1; }
+  .repair-checkbox { width: 22px; height: 22px; accent-color: var(--accent); cursor: pointer; }
+  .card-actions { padding: 12px 18px; border-top: 1px solid var(--border); background: var(--surface2); }
+  .btn-add { width: 100%; background: var(--text); color: white; border: none; border-radius: 11px; padding: 13px; font-size: 14px; font-weight: 700; cursor: pointer; }
+  .btn-add:active { opacity: 0.85; }
 
-  .repair-row { padding: 12px 14px; display: flex; align-items: center; gap: 10px; border-top: 1px solid var(--border); background: #1f1500; }
-  .repair-row label { font-size: 13px; font-weight: 600; color: var(--yellow); cursor: pointer; flex: 1; }
-  .repair-checkbox { width: 20px; height: 20px; accent-color: var(--accent); cursor: pointer; }
+  /* SESSION LIST TAB */
+  .list-section { padding: 14px 16px 6px; display: flex; align-items: center; justify-content: space-between; }
+  .section-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; color: var(--muted); }
+  .btn-text { background: none; border: none; color: var(--muted); font-size: 12px; cursor: pointer; padding: 4px 8px; border-radius: 6px; font-weight: 500; }
 
-  .card-actions { padding: 10px 14px; border-top: 1px solid var(--border); display: flex; gap: 8px; }
-  .btn-add { flex: 1; background: var(--accent); border: none; color: white; border-radius: 9px; padding: 10px; font-size: 13px; font-weight: 600; cursor: pointer; }
-  .btn-add:active { opacity: 0.8; }
-
-  /* SESSION LIST */
-  .session-section { padding: 14px 16px 4px; }
-  .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
-  .section-title { font-size: 12px; text-transform: uppercase; letter-spacing: 0.7px; color: var(--muted); font-weight: 600; }
-  .btn-clear { background: none; border: none; color: var(--muted); font-size: 12px; cursor: pointer; padding: 2px 6px; }
-
-  .session-list { display: flex; flex-direction: column; gap: 6px; padding: 0 16px 16px; }
-  .session-item { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; display: flex; align-items: center; gap: 10px; }
-  .session-item.repair-flagged { border-color: var(--yellow); }
+  .session-list { display: flex; flex-direction: column; gap: 8px; padding: 0 16px 20px; }
+  .session-item { background: var(--surface); border: 1.5px solid var(--border); border-radius: 12px; padding: 12px 14px; display: flex; align-items: center; gap: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+  .session-item.repair-flagged { border-color: #fde68a; background: var(--yellow-light); }
   .item-info { flex: 1; min-width: 0; }
-  .item-product { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .item-meta { font-size: 11px; color: var(--muted); margin-top: 1px; font-family: monospace; }
-  .item-repair-badge { background: var(--yellow); color: #000; font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 20px; flex-shrink: 0; }
+  .item-product { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .item-meta { font-size: 11px; color: var(--muted); margin-top: 2px; font-family: monospace; }
+  .item-repair-badge { background: var(--yellow); color: white; font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 20px; flex-shrink: 0; }
   .item-repair-check { width: 18px; height: 18px; accent-color: var(--accent); cursor: pointer; flex-shrink: 0; }
 
   /* EXPORT TAB */
   .export-area { padding: 16px; display: flex; flex-direction: column; gap: 12px; flex: 1; }
-  .export-filter { display: flex; gap: 6px; }
-  .filter-btn { flex: 1; background: var(--surface); border: 1px solid var(--border); color: var(--muted); border-radius: 9px; padding: 10px 8px; font-size: 12px; font-weight: 600; cursor: pointer; text-align: center; }
-  .filter-btn.active { border-color: var(--accent); color: var(--accent); background: #1a0f00; }
-
-  .export-preview { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; flex: 1; overflow-y: auto; min-height: 200px; }
+  .export-filter { display: flex; gap: 8px; }
+  .filter-btn { flex: 1; background: var(--surface); border: 1.5px solid var(--border); color: var(--muted); border-radius: 10px; padding: 11px 8px; font-size: 12px; font-weight: 600; cursor: pointer; text-align: center; }
+  .filter-btn.active { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+  .export-preview { background: var(--surface); border: 1.5px solid var(--border); border-radius: 13px; flex: 1; overflow-y: auto; min-height: 180px; }
   .export-table { width: 100%; border-collapse: collapse; font-size: 11px; }
-  .export-table th { background: var(--surface2); color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; font-size: 10px; padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--border); position: sticky; top: 0; }
-  .export-table td { padding: 8px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  .export-table th { background: var(--surface2); color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; font-size: 10px; font-weight: 700; padding: 9px 11px; text-align: left; border-bottom: 1px solid var(--border); position: sticky; top: 0; }
+  .export-table td { padding: 9px 11px; border-bottom: 1px solid var(--border); vertical-align: top; }
   .export-table tr:last-child td { border-bottom: none; }
-  .export-table tr.repair td { background: #1a1200; }
+  .export-table tr.repair td { background: var(--yellow-light); }
   .empty-export { padding: 40px 20px; text-align: center; color: var(--muted); font-size: 13px; }
-
-  .export-btns { display: flex; gap: 8px; }
-  .btn-export { flex: 1; border: none; border-radius: 10px; padding: 13px; font-size: 14px; font-weight: 600; cursor: pointer; }
-  .btn-export.csv { background: var(--surface); border: 1px solid var(--accent); color: var(--accent); }
-  .btn-export.pdf { background: var(--accent); color: white; }
+  .export-btns { display: flex; gap: 10px; }
+  .btn-export { flex: 1; border: none; border-radius: 11px; padding: 14px; font-size: 14px; font-weight: 700; cursor: pointer; }
+  .btn-export.csv { background: var(--surface); border: 1.5px solid var(--accent); color: var(--accent); }
+  .btn-export.pdf { background: var(--accent); color: white; box-shadow: 0 2px 8px rgba(232,96,10,0.3); }
 
   /* UNKNOWN TAB */
-  .unknown-area { padding: 14px 16px 4px; }
-  .unknown-list { display: flex; flex-direction: column; gap: 6px; padding: 0 16px 16px; }
-  .unknown-item { background: #1a0505; border: 1px solid var(--red); border-radius: 10px; padding: 10px 12px; display: flex; align-items: center; gap: 10px; }
-  .unknown-query { font-size: 14px; font-weight: 700; font-family: 'SF Mono', monospace; color: var(--red); flex: 1; word-break: break-all; }
-  .unknown-time { font-size: 10px; color: var(--muted); flex-shrink: 0; }
-  .unknown-badge { background: var(--red); color: white; font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 20px; flex-shrink: 0; }
-  .unknown-note { background: var(--bg); border: 1px solid var(--border); border-radius: 7px; color: var(--text); font-size: 12px; padding: 6px 9px; margin-top: 6px; width: 100%; font-family: -apple-system, sans-serif; }
+  .unknown-area { padding: 14px 16px 6px; }
+  .unknown-list { display: flex; flex-direction: column; gap: 8px; padding: 0 16px 20px; }
+  .unknown-item { background: var(--surface); border: 1.5px solid #fecaca; border-radius: 12px; padding: 13px 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+  .unknown-top { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .unknown-query { font-size: 16px; font-weight: 800; font-family: 'SF Mono', monospace; color: var(--red); flex: 1; }
+  .unknown-time { font-size: 11px; color: var(--muted); flex-shrink: 0; }
+  .unknown-remove { background: none; border: none; color: var(--muted); font-size: 16px; cursor: pointer; padding: 0 2px; flex-shrink: 0; }
+  .unknown-note { background: var(--bg); border: 1.5px solid var(--border); border-radius: 9px; color: var(--text); font-size: 13px; padding: 9px 12px; width: 100%; font-family: -apple-system, sans-serif; }
   .unknown-note:focus { outline: none; border-color: var(--accent); }
   .unknown-note::placeholder { color: var(--muted); }
 
-  /* GEAR LIST TAB */
-  .list-area { padding: 16px; display: flex; flex-direction: column; gap: 10px; flex: 1; }
-  .list-area p { font-size: 12px; color: var(--muted); line-height: 1.6; }
-  .list-area p code { background: var(--surface); padding: 1px 5px; border-radius: 4px; font-family: 'SF Mono', monospace; font-size: 11px; color: #fb923c; }
-  textarea { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; color: var(--text); font-family: 'SF Mono', monospace; font-size: 11px; line-height: 1.6; padding: 12px; resize: none; flex: 1; min-height: 180px; }
-  textarea:focus { outline: none; border-color: var(--accent); }
-  .btn-save { background: var(--surface); border: 1px solid var(--accent); color: var(--accent); border-radius: 10px; padding: 12px; font-size: 14px; font-weight: 600; cursor: pointer; }
-  .gear-count { font-size: 12px; color: var(--green); text-align: center; }
+  /* GEAR / DATA TAB */
+  .gear-area { padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+
+  /* Upload button */
+  .upload-zone { background: var(--surface); border: 2px dashed var(--border); border-radius: 14px; padding: 24px 16px; text-align: center; cursor: pointer; transition: border-color 0.15s; }
+  .upload-zone:hover { border-color: var(--accent); }
+  .upload-zone .upload-icon { font-size: 28px; margin-bottom: 6px; }
+  .upload-zone .upload-label { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 3px; }
+  .upload-zone .upload-sub { font-size: 12px; color: var(--muted); }
+  #csv-file-input { display: none; }
+
+  /* Uploaded docs list */
+  .docs-section-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; color: var(--muted); }
+  .docs-list { display: flex; flex-direction: column; gap: 8px; }
+  .doc-item { background: var(--surface); border: 1.5px solid var(--border); border-radius: 12px; padding: 12px 14px; display: flex; align-items: center; gap: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+  .doc-icon { font-size: 20px; flex-shrink: 0; }
+  .doc-info { flex: 1; min-width: 0; }
+  .doc-name { font-size: 13px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .doc-meta { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .doc-delete { background: none; border: none; color: var(--muted); font-size: 16px; cursor: pointer; padding: 4px; flex-shrink: 0; border-radius: 6px; }
+  .doc-delete:hover { background: var(--red-light); color: var(--red); }
+  .db-summary { background: var(--accent-light); border: 1.5px solid #fed7aa; border-radius: 12px; padding: 12px 14px; font-size: 13px; color: var(--accent); font-weight: 600; text-align: center; }
+
+  /* SESSIONS MODAL */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 100; display: none; align-items: flex-end; }
+  .modal-overlay.open { display: flex; }
+  .modal-sheet { background: var(--surface); border-radius: 20px 20px 0 0; width: 100%; max-height: 80dvh; display: flex; flex-direction: column; padding-bottom: env(safe-area-inset-bottom, 0); }
+  .modal-header { padding: 16px 18px 12px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+  .modal-title { font-size: 16px; font-weight: 700; }
+  .modal-close { background: var(--bg); border: none; color: var(--muted); font-size: 18px; cursor: pointer; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+  .modal-body { flex: 1; overflow-y: auto; padding: 12px 16px 16px; display: flex; flex-direction: column; gap: 8px; }
+  .modal-new-btn { background: var(--accent); color: white; border: none; border-radius: 11px; padding: 13px; font-size: 14px; font-weight: 700; cursor: pointer; width: 100%; margin-bottom: 4px; }
+
+  .saved-session-item { background: var(--surface); border: 1.5px solid var(--border); border-radius: 12px; padding: 13px 14px; display: flex; align-items: center; gap: 10px; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+  .saved-session-item.active-session { border-color: var(--accent); background: var(--accent-light); }
+  .saved-session-item:hover { border-color: var(--accent); }
+  .ss-info { flex: 1; min-width: 0; }
+  .ss-name { font-size: 14px; font-weight: 600; color: var(--text); }
+  .ss-meta { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .ss-delete { background: none; border: none; color: var(--muted); font-size: 15px; cursor: pointer; padding: 4px; border-radius: 6px; flex-shrink: 0; }
+  .ss-delete:hover { background: var(--red-light); color: var(--red); }
+
+  .empty-state { text-align: center; color: var(--muted); font-size: 13px; padding: 30px 20px; }
 </style>
 </head>
 <body>
@@ -141,7 +189,7 @@
   <div class="logo">🔍</div>
   <h1>SH Lookup <span>· Orms</span></h1>
   <div class="header-right">
-    <div class="session-badge">Session: <span id="session-count">0</span></div>
+    <div class="session-badge" onclick="openSessionsModal()">📋 <span id="session-name-badge">New Session</span></div>
   </div>
 </header>
 
@@ -150,7 +198,7 @@
   <button onclick="switchTab('session')">📋 List</button>
   <button onclick="switchTab('export')">📤 Export</button>
   <button onclick="switchTab('unknown')" id="tab-btn-unknown">❓ Unknown</button>
-  <button onclick="switchTab('list')">⚙️ Gear</button>
+  <button onclick="switchTab('gear')">📂 Data</button>
 </div>
 
 <!-- SCAN TAB -->
@@ -159,33 +207,36 @@
     <div id="preview-wrap">
       <div class="placeholder">
         <span class="icon">📷</span>
-        <span>Photo or type to look up</span>
+        <span>Take a photo of the serial number</span>
       </div>
     </div>
-
     <button class="btn-capture" onclick="document.getElementById('file-input').click()">
       📷 Take Photo / Choose Image
     </button>
     <input type="file" id="file-input" accept="image/*" capture="environment" onchange="handleImage(this)">
-
     <div class="manual-row">
       <input type="text" id="manual-input" placeholder="Type SH or serial number…" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" oninput="onManualInput()" onkeydown="if(event.key==='Enter')manualLookup()">
       <button id="manual-btn" onclick="manualLookup()" disabled>→</button>
     </div>
-
     <div id="status" class="status"></div>
 
-    <!-- RESULT CARD -->
     <div id="result-card" class="result-card">
-      <div class="card-header">
-        <div id="card-product" class="card-product">—</div>
-        <div id="card-desc" class="card-desc"></div>
+      <div id="card-top" class="card-top">
+        <div class="card-status-row">
+          <div id="status-dot" class="status-dot green"></div>
+          <div id="status-label" class="status-label green">Found</div>
+        </div>
+        <div id="card-product" class="card-product-name">—</div>
+        <div id="card-desc" class="card-desc-text"></div>
+      </div>
+      <div class="sh-hero" id="sh-hero">
+        <div>
+          <div class="sh-hero-label">SH Number</div>
+          <div id="card-sh" class="sh-hero-value">—</div>
+        </div>
+        <button class="sh-copy-btn" onclick="copySH()">Copy</button>
       </div>
       <div class="card-fields">
-        <div class="card-field">
-          <div class="field-label">SH Number</div>
-          <div id="card-sh" class="field-val sh">—</div>
-        </div>
         <div class="card-field">
           <div class="field-label">Serial</div>
           <div id="card-serial" class="field-val">—</div>
@@ -195,16 +246,16 @@
           <div id="card-osdoc" class="field-val">—</div>
         </div>
         <div class="card-field">
-          <div class="field-label">Shutter</div>
-          <div id="card-shutter" class="field-val">—</div>
+          <div class="field-label">Rating</div>
+          <div id="card-rating" class="field-val large">—</div>
         </div>
         <div class="card-field">
-          <div class="field-label">Rating</div>
-          <div id="card-rating" class="field-val">—</div>
+          <div class="field-label">Shutter Count</div>
+          <div id="card-shutter" class="field-val">—</div>
         </div>
         <div id="notes-field" class="card-field full" style="display:none">
           <div class="field-label">⚠️ Notes</div>
-          <div id="card-notes" class="field-val notes"></div>
+          <div id="card-notes" class="field-val notes-val"></div>
         </div>
       </div>
       <div id="repair-row" class="repair-row" style="display:none">
@@ -220,14 +271,12 @@
 
 <!-- SESSION LIST TAB -->
 <div id="tab-session" class="tab-content">
-  <div class="session-section">
-    <div class="section-header">
-      <div class="section-title">Scanned this session</div>
-      <button class="btn-clear" onclick="clearSession()">Clear all</button>
-    </div>
+  <div class="list-section">
+    <div class="section-title">Current session</div>
+    <button class="btn-text" onclick="clearCurrentSession()">Clear</button>
   </div>
   <div id="session-list" class="session-list">
-    <div style="text-align:center;color:var(--muted);font-size:13px;padding:30px">Nothing scanned yet</div>
+    <div class="empty-state">Nothing scanned yet</div>
   </div>
 </div>
 
@@ -239,15 +288,9 @@
       <div class="filter-btn" id="filter-repair" onclick="setFilter('repair')">🔧 Repairs Only</div>
     </div>
     <div class="export-preview">
-      <table class="export-table" id="export-table">
-        <thead>
-          <tr>
-            <th>SH</th><th>Serial</th><th>OS Doc</th><th>Product</th><th>Rating</th><th>Notes</th>
-          </tr>
-        </thead>
-        <tbody id="export-body">
-          <tr><td colspan="6" class="empty-export">No items in session</td></tr>
-        </tbody>
+      <table class="export-table">
+        <thead><tr><th>SH</th><th>Serial</th><th>OS Doc</th><th>Product</th><th>Rating</th><th>Notes</th></tr></thead>
+        <tbody id="export-body"><tr><td colspan="6" class="empty-export">No items in session</td></tr></tbody>
       </table>
     </div>
     <div class="export-btns">
@@ -260,29 +303,51 @@
 <!-- UNKNOWN TAB -->
 <div id="tab-unknown" class="tab-content">
   <div class="unknown-area">
-    <div class="section-header">
+    <div class="list-section" style="padding:0 0 8px">
       <div class="section-title">Not found in gear list</div>
-      <button class="btn-clear" onclick="clearUnknown()">Clear all</button>
+      <button class="btn-text" onclick="clearUnknown()">Clear all</button>
     </div>
-    <div style="font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.5">Items scanned that couldn't be matched — check the database or allocate an SH number.</div>
+    <p style="font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:4px">Items that couldn't be matched — add notes then allocate an SH number in the system.</p>
   </div>
   <div id="unknown-list" class="unknown-list">
-    <div style="text-align:center;color:var(--muted);font-size:13px;padding:30px">No unmatched scans yet</div>
+    <div class="empty-state">No unmatched scans yet</div>
   </div>
 </div>
 
-<!-- GEAR LIST TAB -->
-<div id="tab-list" class="tab-content">
-  <div class="list-area">
-    <p>
-      One item per line — columns in order:<br>
-      <code>SH, Serial, OS Doc, Product, Description, Shutter, Rating, Notes</code><br><br>
-      SH and Serial are required. All other columns optional. You can paste a CSV export directly.
-    </p>
-    <textarea id="gear-input" placeholder="SH00123, SN1234567, OSD001, Canon EOS R5, Full-frame mirrorless, 12500, A, Needs sensor clean
-SH00456, SN9876543, OSD002, Sony 70-200mm, f/2.8 G Master, , B,"></textarea>
-    <button class="btn-save" onclick="saveList()">✓ Save Gear List</button>
-    <div id="gear-count" class="gear-count"></div>
+<!-- DATA / GEAR TAB -->
+<div id="tab-gear" class="tab-content">
+  <div class="gear-area">
+
+    <div id="db-summary" class="db-summary" style="display:none"></div>
+
+    <!-- Upload zone -->
+    <div class="upload-zone" onclick="document.getElementById('csv-file-input').click()">
+      <div class="upload-icon">📄</div>
+      <div class="upload-label">Upload CSV / gear export</div>
+      <div class="upload-sub">Tap to choose file — adds to existing database</div>
+    </div>
+    <input type="file" id="csv-file-input" accept=".csv,.txt" onchange="handleCSVUpload(this)">
+
+    <!-- Uploaded docs -->
+    <div class="docs-section-title">Uploaded files</div>
+    <div id="docs-list" class="docs-list">
+      <div class="empty-state" style="padding:16px">No files uploaded yet</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- SESSIONS MODAL -->
+<div class="modal-overlay" id="sessions-modal" onclick="maybeCloseModal(event)">
+  <div class="modal-sheet">
+    <div class="modal-header">
+      <div class="modal-title">Sessions</div>
+      <button class="modal-close" onclick="closeSessionsModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <button class="modal-new-btn" onclick="newSession()">+ Start New Session</button>
+      <div id="saved-sessions-list"></div>
+    </div>
   </div>
 </div>
 
@@ -290,79 +355,221 @@ SH00456, SN9876543, OSD002, Sony 70-200mm, f/2.8 G Master, , B,"></textarea>
 const API = "https://api.anthropic.com/v1/messages";
 const COLS = ['sh','serial','osdoc','product','desc','shutter','rating','notes'];
 
-// Data
-let entries = []; // gear list
-let shMap = {}, serialMap = {};
-let session = []; // scanned items this session
-let unknown = []; // unmatched scans
+// ── STATE ─────────────────────────────────────────────────
+let shMap = {}, serialMap = {};       // combined lookup from all uploads
+let uploads = [];                      // [{id, name, uploadedAt, rowCount, entries:[]}]
+let sessions = [];                     // [{id, name, createdAt, items:[], unknown:[]}]
+let activeSessionId = null;
 let currentMatch = null;
 let exportFilter = 'all';
 
-// ── LOAD / SAVE ──────────────────────────────────────────
-function loadSaved() {
-  try {
-    const g = localStorage.getItem('orms-gear-v3');
-    if (g) { entries = JSON.parse(g); buildMaps(); updateGearCount(); rebuildTextarea(); }
-    const s = localStorage.getItem('orms-session-v1');
-    if (s) { session = JSON.parse(s); renderSession(); renderExport(); }
-    const u = localStorage.getItem('orms-unknown-v1');
-    if (u) { unknown = JSON.parse(u); renderUnknown(); }
-  } catch(e) {}
+function activeSession() { return sessions.find(s => s.id === activeSessionId) || null; }
+function sessionItems() { return activeSession()?.items || []; }
+function sessionUnknown() { return activeSession()?.unknown || []; }
+
+// ── PERSIST ───────────────────────────────────────────────
+function saveAll() {
+  localStorage.setItem('orms-uploads-v1', JSON.stringify(uploads));
+  localStorage.setItem('orms-sessions-v2', JSON.stringify(sessions));
+  localStorage.setItem('orms-active-session', activeSessionId || '');
 }
 
-function buildMaps() {
+function loadSaved() {
+  try {
+    const u = localStorage.getItem('orms-uploads-v1');
+    if (u) uploads = JSON.parse(u);
+    const s = localStorage.getItem('orms-sessions-v2');
+    if (s) sessions = JSON.parse(s);
+    activeSessionId = localStorage.getItem('orms-active-session') || null;
+    // If no sessions exist, create one
+    if (!sessions.length) newSession(true);
+    // If active session was deleted, pick first
+    if (!activeSession()) activeSessionId = sessions[0]?.id || null;
+    rebuildMaps();
+    renderAll();
+  } catch(e) { newSession(true); }
+}
+
+function rebuildMaps() {
   shMap = {}; serialMap = {};
-  entries.forEach(e => {
-    if (e.sh) shMap[norm(e.sh)] = e;
-    if (e.serial) serialMap[norm(e.serial)] = e;
+  uploads.forEach(upload => {
+    upload.entries.forEach(e => {
+      if (e.sh) shMap[norm(e.sh)] = e;
+      if (e.serial) serialMap[norm(e.serial)] = e;
+    });
   });
+  updateDBSummary();
 }
 
 function norm(s) { return (s||'').toUpperCase().replace(/[\s\-]/g,''); }
 
-function saveSession() {
-  localStorage.setItem('orms-session-v1', JSON.stringify(session));
-  document.getElementById('session-count').textContent = session.length;
+function renderAll() {
+  renderSession();
+  renderUnknown();
+  renderExport();
+  renderDocs();
+  updateSessionBadge();
 }
 
-function rebuildTextarea() {
-  document.getElementById('gear-input').value = entries.map(e =>
-    COLS.map(c => e[c]||'').join(', ')
-  ).join('\n');
+// ── SESSIONS ──────────────────────────────────────────────
+function newSession(silent) {
+  const now = new Date();
+  const name = now.toLocaleDateString('en-ZA', {day:'numeric',month:'short'}) + ' · ' +
+               now.toLocaleTimeString('en-ZA', {hour:'2-digit', minute:'2-digit'});
+  const id = 'sess_' + Date.now();
+  sessions.unshift({ id, name, createdAt: Date.now(), items: [], unknown: [] });
+  activeSessionId = id;
+  saveAll();
+  if (!silent) {
+    closeSessionsModal();
+    renderAll();
+  }
 }
 
-function updateGearCount() {
-  document.getElementById('gear-count').textContent = entries.length ? `✓ ${entries.length} items loaded` : '';
-}
-
-function saveList() {
-  const raw = document.getElementById('gear-input').value.trim();
-  if (!raw) return;
-  entries = raw.split('\n').map(line => {
-    const p = line.split(/,/).map(x => x.trim());
-    return { sh: p[0]||'', serial: p[1]||'', osdoc: p[2]||'', product: p[3]||'', desc: p[4]||'', shutter: p[5]||'', rating: p[6]||'', notes: p[7]||'' };
-  }).filter(e => e.sh || e.serial);
-  buildMaps();
-  localStorage.setItem('orms-gear-v3', JSON.stringify(entries));
-  updateGearCount();
-  document.getElementById('gear-count').textContent = `✓ ${entries.length} items saved`;
+function switchActiveSession(id) {
+  activeSessionId = id;
+  saveAll();
+  closeSessionsModal();
+  renderAll();
   switchTab('scan');
+}
+
+function deleteSession(id, e) {
+  e.stopPropagation();
+  if (sessions.length === 1) { alert("Can't delete the only session."); return; }
+  if (!confirm('Delete this session?')) return;
+  sessions = sessions.filter(s => s.id !== id);
+  if (activeSessionId === id) activeSessionId = sessions[0]?.id || null;
+  saveAll();
+  renderSavedSessionsList();
+  renderAll();
+}
+
+function updateSessionBadge() {
+  const s = activeSession();
+  document.getElementById('session-name-badge').textContent = s ? s.name : 'No session';
+  document.getElementById('session-count') && (document.getElementById('session-count').textContent = sessionItems().length);
+}
+
+function openSessionsModal() {
+  renderSavedSessionsList();
+  document.getElementById('sessions-modal').classList.add('open');
+}
+
+function closeSessionsModal() {
+  document.getElementById('sessions-modal').classList.remove('open');
+}
+
+function maybeCloseModal(e) {
+  if (e.target === document.getElementById('sessions-modal')) closeSessionsModal();
+}
+
+function renderSavedSessionsList() {
+  const el = document.getElementById('saved-sessions-list');
+  if (!sessions.length) { el.innerHTML = '<div class="empty-state">No saved sessions</div>'; return; }
+  el.innerHTML = sessions.map(s => `
+    <div class="saved-session-item ${s.id===activeSessionId?'active-session':''}" onclick="switchActiveSession('${s.id}')">
+      <div class="ss-info">
+        <div class="ss-name">${s.name}</div>
+        <div class="ss-meta">${s.items.length} item${s.items.length!==1?'s':''} · ${s.unknown.length} unknown</div>
+      </div>
+      ${s.id===activeSessionId ? '<span style="color:var(--accent);font-size:12px;font-weight:700">Active</span>' : ''}
+      <button class="ss-delete" onclick="deleteSession('${s.id}', event)">🗑</button>
+    </div>`).join('');
+}
+
+function clearCurrentSession() {
+  if (!confirm('Clear all items from this session?')) return;
+  const s = activeSession(); if (!s) return;
+  s.items = []; s.unknown = [];
+  saveAll(); renderAll();
 }
 
 // ── TABS ─────────────────────────────────────────────────
 function switchTab(tab) {
-  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.tab-bar button').forEach(b => b.classList.remove('active'));
-  document.getElementById('tab-' + tab).classList.add('active');
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-bar button').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+tab).classList.add('active');
   const btn = document.querySelector(`.tab-bar button[onclick*="'${tab}'"]`);
   if (btn) btn.classList.add('active');
-  if (tab === 'export') renderExport();
+  if (tab==='export') renderExport();
 }
 
-// ── SCAN / LOOKUP ─────────────────────────────────────────
+// ── CSV UPLOAD ────────────────────────────────────────────
+function handleCSVUpload(input) {
+  const file = input.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const text = e.target.result;
+    const lines = text.trim().split('\n');
+    let entries = [];
+    let startIdx = 0;
+
+    // Detect and skip header row
+    const firstLine = lines[0].toLowerCase();
+    if (firstLine.includes('sh') || firstLine.includes('serial') || firstLine.includes('product')) startIdx = 1;
+
+    for (let i = startIdx; i < lines.length; i++) {
+      const p = lines[i].split(/,/).map(x => x.trim().replace(/^"|"$/g,''));
+      if (p.length < 2) continue;
+      const entry = { sh:p[0]||'', serial:p[1]||'', osdoc:p[2]||'', product:p[3]||'', desc:p[4]||'', shutter:p[5]||'', rating:p[6]||'', notes:p[7]||'' };
+      if (entry.sh || entry.serial) entries.push(entry);
+    }
+
+    if (!entries.length) { alert('No valid data found in this file. Make sure columns are: SH, Serial, OS Doc, Product, Description, Shutter, Rating, Notes'); return; }
+
+    uploads.push({
+      id: 'upload_' + Date.now(),
+      name: file.name,
+      uploadedAt: Date.now(),
+      rowCount: entries.length,
+      entries
+    });
+    rebuildMaps();
+    saveAll();
+    renderDocs();
+    alert(`✓ Loaded ${entries.length} items from ${file.name}`);
+  };
+  reader.readAsText(file);
+  input.value = '';
+}
+
+function deleteUpload(id) {
+  if (!confirm('Remove this file from the database?')) return;
+  uploads = uploads.filter(u => u.id !== id);
+  rebuildMaps();
+  saveAll();
+  renderDocs();
+}
+
+function renderDocs() {
+  const el = document.getElementById('docs-list');
+  if (!uploads.length) { el.innerHTML = '<div class="empty-state" style="padding:16px">No files uploaded yet</div>'; return; }
+  el.innerHTML = uploads.map(u => `
+    <div class="doc-item">
+      <div class="doc-icon">📄</div>
+      <div class="doc-info">
+        <div class="doc-name">${u.name}</div>
+        <div class="doc-meta">${u.rowCount} items · ${new Date(u.uploadedAt).toLocaleDateString('en-ZA', {day:'numeric',month:'short',year:'numeric'})}</div>
+      </div>
+      <button class="doc-delete" onclick="deleteUpload('${u.id}')">🗑</button>
+    </div>`).join('');
+}
+
+function updateDBSummary() {
+  const total = Object.keys(shMap).length;
+  const el = document.getElementById('db-summary');
+  if (total) {
+    el.style.display = 'block';
+    el.textContent = `📦 ${total} items in database across ${uploads.length} file${uploads.length!==1?'s':''}`;
+  } else {
+    el.style.display = 'none';
+  }
+}
+
+// ── SCAN ─────────────────────────────────────────────────
 async function handleImage(input) {
-  const file = input.files[0];
-  if (!file) return;
+  const file = input.files[0]; if (!file) return;
   const reader = new FileReader();
   reader.onload = async (e) => {
     const b64 = e.target.result.split(',')[1];
@@ -372,7 +579,7 @@ async function handleImage(input) {
     try {
       const serials = await extractSerials(b64, file.type);
       if (!serials.length) { setStatus('No serial found — try a clearer photo'); return; }
-      const match = serials.map(s => lookup(s)).find(Boolean);
+      const match = serials.map(s=>lookup(s)).find(Boolean);
       showCard(match, serials[0]);
     } catch(err) { setStatus('⚠️ ' + err.message); }
   };
@@ -382,47 +589,43 @@ async function handleImage(input) {
 
 async function extractSerials(b64, mimeType) {
   const resp = await fetch(API, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-6', max_tokens: 400,
-      messages: [{ role: 'user', content: [
-        { type: 'image', source: { type: 'base64', media_type: mimeType||'image/jpeg', data: b64 } },
-        { type: 'text', text: 'Extract all serial numbers from this camera/photography equipment image. Return ONLY JSON, no markdown:\n{"serials":["SN123"]}\nIf none: {"serials":[]}\nOmit label text like S/N.' }
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({ model:'claude-sonnet-4-6', max_tokens:400,
+      messages:[{role:'user', content:[
+        {type:'image', source:{type:'base64', media_type:mimeType||'image/jpeg', data:b64}},
+        {type:'text', text:'Extract all serial numbers from this camera/photography equipment. Return ONLY JSON, no markdown:\n{"serials":["SN123"]}\nIf none: {"serials":[]}\nOmit label text like S/N.'}
       ]}]
     })
   });
-  if (!resp.ok) { const e = await resp.json(); throw new Error(e.error?.message||'API error'); }
+  if (!resp.ok) { const e=await resp.json(); throw new Error(e.error?.message||'API error'); }
   const data = await resp.json();
   const text = data.content.map(c=>c.text||'').join('');
-  return JSON.parse(text.replace(/```json|```/g,'').trim()).serials || [];
+  return JSON.parse(text.replace(/```json|```/g,'').trim()).serials||[];
 }
 
-function lookup(query) {
-  const k = norm(query);
-  return shMap[k] || serialMap[k] || null;
-}
+function lookup(q) { const k=norm(q); return shMap[k]||serialMap[k]||null; }
 
 function manualLookup() {
   const val = document.getElementById('manual-input').value.trim();
   if (!val) return;
-  const match = lookup(val);
-  showCard(match, val);
+  showCard(lookup(val), val);
   document.getElementById('manual-input').blur();
 }
-
 function onManualInput() {
   document.getElementById('manual-btn').disabled = !document.getElementById('manual-input').value.trim();
 }
 
-// ── CARD ──────────────────────────────────────────────────
+// ── CARD ─────────────────────────────────────────────────
 function showCard(match, rawQuery) {
   setStatus('');
   const card = document.getElementById('result-card');
   currentMatch = match;
-
   if (match) {
     card.className = 'result-card visible found';
+    document.getElementById('card-top').className = 'card-top found-bg';
+    document.getElementById('status-dot').className = 'status-dot green';
+    document.getElementById('status-label').className = 'status-label green';
+    document.getElementById('status-label').textContent = 'Found';
     document.getElementById('card-product').textContent = match.product || 'Unknown item';
     document.getElementById('card-desc').textContent = match.desc || '';
     document.getElementById('card-sh').textContent = match.sh || '—';
@@ -430,16 +633,20 @@ function showCard(match, rawQuery) {
     document.getElementById('card-osdoc').textContent = match.osdoc || '—';
     document.getElementById('card-shutter').textContent = match.shutter || '—';
     document.getElementById('card-rating').textContent = match.rating || '—';
-
     const hasNotes = match.notes && match.notes.trim();
     document.getElementById('notes-field').style.display = hasNotes ? 'block' : 'none';
     document.getElementById('card-notes').textContent = match.notes || '';
     document.getElementById('repair-row').style.display = hasNotes ? 'flex' : 'none';
     document.getElementById('repair-check').checked = false;
+    document.getElementById('sh-hero').style.display = 'flex';
   } else {
     card.className = 'result-card visible not-found';
-    const hasGear = entries.length > 0;
-    document.getElementById('card-product').textContent = hasGear ? 'Not found in gear list' : 'No gear list loaded';
+    document.getElementById('card-top').className = 'card-top notfound-bg';
+    document.getElementById('status-dot').className = 'status-dot red';
+    document.getElementById('status-label').className = 'status-label red';
+    document.getElementById('status-label').textContent = 'Not Found';
+    const hasData = Object.keys(shMap).length > 0;
+    document.getElementById('card-product').textContent = hasData ? 'Not in database' : 'No data loaded yet';
     document.getElementById('card-desc').textContent = rawQuery;
     document.getElementById('card-sh').textContent = '—';
     document.getElementById('card-serial').textContent = rawQuery;
@@ -448,210 +655,143 @@ function showCard(match, rawQuery) {
     document.getElementById('card-rating').textContent = '—';
     document.getElementById('notes-field').style.display = 'none';
     document.getElementById('repair-row').style.display = 'none';
-    // Auto-log to Unknown tab
-    if (hasGear) addToUnknown(rawQuery);
+    document.getElementById('sh-hero').style.display = 'none';
+    if (hasData) addToUnknown(rawQuery);
   }
 }
 
-function saveUnknown() {
-  localStorage.setItem('orms-unknown-v1', JSON.stringify(unknown));
+function hideCard() { document.getElementById('result-card').className = 'result-card'; }
+function setStatus(html) { document.getElementById('status').innerHTML = html; }
+
+function copySH() {
+  const val = document.getElementById('card-sh').textContent;
+  if (!val || val==='—') return;
+  navigator.clipboard.writeText(val).then(() => {
+    const btn = document.querySelector('.sh-copy-btn');
+    btn.textContent = '✓'; setTimeout(()=>btn.textContent='Copy', 1500);
+  });
+}
+
+// ── SESSION ITEMS ─────────────────────────────────────────
+function addToSession() {
+  if (!currentMatch) return;
+  const s = activeSession(); if (!s) return;
+  const repair = document.getElementById('repair-check').checked;
+  const item = { ...currentMatch, repair, addedAt: Date.now() };
+  const idx = s.items.findIndex(i => norm(i.serial)===norm(item.serial) && norm(i.sh)===norm(item.sh));
+  if (idx >= 0) s.items[idx] = item; else s.items.unshift(item);
+  saveAll(); renderSession(); updateSessionBadge();
+  setStatus('✓ Added to session list');
+  setTimeout(()=>setStatus(''), 1500);
+}
+
+function renderSession() {
+  const el = document.getElementById('session-list');
+  const items = sessionItems();
+  updateSessionBadge();
+  if (!items.length) { el.innerHTML = '<div class="empty-state">Nothing scanned yet</div>'; return; }
+  el.innerHTML = items.map((item, i) => `
+    <div class="session-item ${item.repair?'repair-flagged':''}">
+      <div class="item-info">
+        <div class="item-product">${item.product||'Unknown'}</div>
+        <div class="item-meta">${item.sh||'—'} · ${item.serial||'—'}</div>
+      </div>
+      ${item.notes ? `<input type="checkbox" class="item-repair-check" ${item.repair?'checked':''} onchange="toggleRepair(${i},this.checked)">` : ''}
+      ${item.repair ? '<span class="item-repair-badge">REPAIR</span>' : ''}
+    </div>`).join('');
+}
+
+function toggleRepair(i, val) {
+  const s = activeSession(); if (!s) return;
+  s.items[i].repair = val; saveAll(); renderSession(); renderExport();
+}
+
+// ── UNKNOWN ───────────────────────────────────────────────
+function addToUnknown(query) {
+  const s = activeSession(); if (!s) return;
+  if (s.unknown.find(u => u.query.toUpperCase()===query.toUpperCase())) return;
+  s.unknown.unshift({ query, at: Date.now(), note: '' });
+  saveAll(); renderUnknown();
   const btn = document.getElementById('tab-btn-unknown');
-  btn.textContent = unknown.length ? `❓ Unknown (${unknown.length})` : '❓ Unknown';
-  btn.style.color = unknown.length ? 'var(--red)' : '';
+  btn.textContent = s.unknown.length ? `❓ (${s.unknown.length})` : '❓ Unknown';
+  btn.style.color = s.unknown.length ? 'var(--red)' : '';
 }
 
 function renderUnknown() {
   const el = document.getElementById('unknown-list');
   const btn = document.getElementById('tab-btn-unknown');
-  btn.textContent = unknown.length ? `❓ Unknown (${unknown.length})` : '❓ Unknown';
-  btn.style.color = unknown.length ? 'var(--red)' : '';
-  if (!unknown.length) {
-    el.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:13px;padding:30px">No unmatched scans yet</div>';
-    return;
-  }
-  el.innerHTML = unknown.map((item, i) => `
+  const items = sessionUnknown();
+  btn.textContent = items.length ? `❓ (${items.length})` : '❓ Unknown';
+  btn.style.color = items.length ? 'var(--red)' : '';
+  if (!items.length) { el.innerHTML = '<div class="empty-state">No unmatched scans yet</div>'; return; }
+  el.innerHTML = items.map((item, i) => `
     <div class="unknown-item">
-      <div style="flex:1;min-width:0">
+      <div class="unknown-top">
         <div class="unknown-query">${item.query}</div>
-        <input class="unknown-note" placeholder="Type what this is…" value="${(item.note||'').replace(/"/g,'&quot;')}" onchange="updateUnknownNote(${i}, this.value)" onblur="updateUnknownNote(${i}, this.value)">
+        <div class="unknown-time">${new Date(item.at).toLocaleTimeString('en-ZA',{hour:'2-digit',minute:'2-digit'})}</div>
+        <button class="unknown-remove" onclick="removeUnknown(${i})">✕</button>
       </div>
-      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0">
-        <div class="unknown-time">${new Date(item.at).toLocaleTimeString('en-ZA', {hour:'2-digit',minute:'2-digit'})}</div>
-        <button class="unknown-remove" onclick="removeUnknown(${i})" title="Remove">✕</button>
-      </div>
-    </div>
-  `).join('');
+      <input class="unknown-note" placeholder="What is this item? Add a note…" value="${(item.note||'').replace(/"/g,'&quot;')}" onchange="updateUnknownNote(${i},this.value)" onblur="updateUnknownNote(${i},this.value)">
+    </div>`).join('');
 }
 
 function updateUnknownNote(i, val) {
-  unknown[i].note = val;
-  localStorage.setItem('orms-unknown-v1', JSON.stringify(unknown));
+  const s = activeSession(); if (!s) return;
+  s.unknown[i].note = val; saveAll();
 }
 
 function removeUnknown(i) {
-  unknown.splice(i, 1);
-  saveUnknown();
-  renderUnknown();
+  const s = activeSession(); if (!s) return;
+  s.unknown.splice(i,1); saveAll(); renderUnknown();
 }
 
 function clearUnknown() {
-  if (!unknown.length) return;
+  const s = activeSession(); if (!s || !s.unknown.length) return;
   if (!confirm('Clear all unmatched items?')) return;
-  unknown = [];
-  saveUnknown();
-  renderUnknown();
-}
-
-function addToUnknown(query) {
-  // Avoid duplicates
-  if (unknown.find(u => u.query.toUpperCase() === query.toUpperCase())) return;
-  unknown.unshift({ query, at: Date.now() });
-  saveUnknown();
-  renderUnknown();
-}
-
-function addToSession() {
-  if (!currentMatch && !document.getElementById('card-serial').textContent) return;
-  const repair = document.getElementById('repair-check').checked;
-  const item = currentMatch
-    ? { ...currentMatch, repair, addedAt: Date.now() }
-    : { sh:'—', serial: document.getElementById('card-serial').textContent, product:'Unknown', repair, addedAt: Date.now() };
-
-  // Avoid exact duplicate serials
-  const existing = session.findIndex(s => norm(s.serial) === norm(item.serial) && norm(s.sh) === norm(item.sh));
-  if (existing >= 0) session[existing] = item;
-  else session.unshift(item);
-
-  saveSession();
-  renderSession();
-  setStatus('✓ Added to session list');
-  setTimeout(() => setStatus(''), 1500);
-}
-
-function setStatus(html) { document.getElementById('status').innerHTML = html; }
-
-// ── SESSION LIST ──────────────────────────────────────────
-function renderSession() {
-  const el = document.getElementById('session-list');
-  document.getElementById('session-count').textContent = session.length;
-  if (!session.length) {
-    el.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:13px;padding:30px">Nothing scanned yet</div>';
-    return;
-  }
-  el.innerHTML = session.map((item, i) => `
-    <div class="session-item ${item.repair ? 'repair-flagged' : ''}" id="si-${i}">
-      <div class="item-info">
-        <div class="item-product">${item.product || 'Unknown'}</div>
-        <div class="item-meta">${item.sh || '—'} · ${item.serial || '—'}</div>
-      </div>
-      ${item.notes ? `<input type="checkbox" class="item-repair-check" ${item.repair?'checked':''} onchange="toggleRepair(${i}, this.checked)" title="Flag for repair">` : ''}
-      ${item.repair ? '<span class="item-repair-badge">REPAIR</span>' : ''}
-    </div>
-  `).join('');
-}
-
-function toggleRepair(i, val) {
-  session[i].repair = val;
-  saveSession();
-  renderSession();
-  renderExport();
-}
-
-function clearSession() {
-  if (!confirm('Clear all scanned items?')) return;
-  session = [];
-  saveSession();
-  renderSession();
-  renderExport();
+  s.unknown = []; saveAll(); renderUnknown();
 }
 
 // ── EXPORT ────────────────────────────────────────────────
 function setFilter(f) {
   exportFilter = f;
-  document.getElementById('filter-all').className = 'filter-btn' + (f==='all'?' active':'');
-  document.getElementById('filter-repair').className = 'filter-btn' + (f==='repair'?' active':'');
+  document.getElementById('filter-all').className='filter-btn'+(f==='all'?' active':'');
+  document.getElementById('filter-repair').className='filter-btn'+(f==='repair'?' active':'');
   renderExport();
 }
-
-function getFiltered() {
-  return exportFilter === 'repair' ? session.filter(s => s.repair) : session;
-}
-
+function getFiltered() { return exportFilter==='repair' ? sessionItems().filter(s=>s.repair) : sessionItems(); }
 function renderExport() {
   const rows = getFiltered();
   const tbody = document.getElementById('export-body');
-  if (!rows.length) {
-    tbody.innerHTML = '<tr><td colspan="6" class="empty-export">No items to export</td></tr>';
-    return;
-  }
-  tbody.innerHTML = rows.map(item => `
-    <tr class="${item.repair?'repair':''}">
-      <td>${item.sh||'—'}</td>
-      <td>${item.serial||'—'}</td>
-      <td>${item.osdoc||'—'}</td>
-      <td>${item.product||'—'}</td>
-      <td>${item.rating||'—'}</td>
-      <td>${item.notes||''}</td>
-    </tr>
-  `).join('');
+  if (!rows.length) { tbody.innerHTML='<tr><td colspan="6" class="empty-export">No items to export</td></tr>'; return; }
+  tbody.innerHTML = rows.map(item=>`<tr class="${item.repair?'repair':''}"><td>${item.sh||'—'}</td><td>${item.serial||'—'}</td><td>${item.osdoc||'—'}</td><td>${item.product||'—'}</td><td>${item.rating||'—'}</td><td>${item.notes||''}</td></tr>`).join('');
 }
 
 function exportCSV() {
-  const rows = getFiltered();
-  if (!rows.length) return;
-  const headers = ['SH','Serial','OS Doc','Product','Description','Shutter','Rating','Notes','Repair Flag'];
-  const lines = [headers.join(',')];
-  rows.forEach(item => {
-    lines.push([item.sh,item.serial,item.osdoc,item.product,item.desc,item.shutter,item.rating,item.notes,item.repair?'YES':''].map(v=>`"${(v||'').replace(/"/g,'""')}"`).join(','));
-  });
-  const blob = new Blob([lines.join('\n')], {type:'text/csv'});
+  const rows = getFiltered(); if (!rows.length) return;
+  const s = activeSession();
+  const headers = ['SH','Serial','OS Doc','Product','Description','Shutter','Rating','Notes','Repair'];
+  const lines = [headers.join(','), ...rows.map(item=>[item.sh,item.serial,item.osdoc,item.product,item.desc,item.shutter,item.rating,item.notes,item.repair?'YES':''].map(v=>`"${(v||'').replace(/"/g,'""')}"`).join(','))];
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `orms-${exportFilter}-${new Date().toISOString().slice(0,10)}.csv`;
+  a.href = URL.createObjectURL(new Blob([lines.join('\n')],{type:'text/csv'}));
+  a.download = `orms-${(s?.name||'session').replace(/[·:\s]/g,'-')}-${exportFilter}.csv`;
   a.click();
 }
 
 function exportPDF() {
-  const rows = getFiltered();
-  if (!rows.length) return;
-  const title = exportFilter === 'repair' ? 'Repair Items' : 'Scanned Items';
-  const date = new Date().toLocaleDateString('en-ZA');
-  const tableRows = rows.map(item => `
-    <tr style="${item.repair?'background:#fff8e1':''}">
-      <td>${item.sh||'—'}</td>
-      <td>${item.serial||'—'}</td>
-      <td>${item.osdoc||'—'}</td>
-      <td>${item.product||'—'}</td>
-      <td>${item.rating||'—'}</td>
-      <td>${item.notes||''}</td>
-      <td style="text-align:center">${item.repair?'✓':''}</td>
-    </tr>`).join('');
-
-  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8">
-  <style>
-    body{font-family:Arial,sans-serif;font-size:11px;margin:20px;color:#111}
-    h2{font-size:16px;margin-bottom:2px}
-    .sub{color:#666;font-size:11px;margin-bottom:16px}
-    table{width:100%;border-collapse:collapse}
-    th{background:#333;color:#fff;padding:6px 8px;text-align:left;font-size:10px}
-    td{padding:5px 8px;border-bottom:1px solid #ddd;vertical-align:top}
-    .repair-badge{background:#f59e0b;color:#000;padding:1px 6px;border-radius:10px;font-size:9px;font-weight:bold}
-  </style></head><body>
+  const rows = getFiltered(); if (!rows.length) return;
+  const s = activeSession();
+  const title = exportFilter==='repair' ? 'Repair Items' : 'Scanned Items';
+  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><style>body{font-family:Arial,sans-serif;font-size:11px;margin:20px;color:#111}h2{font-size:16px;margin-bottom:2px}.sub{color:#666;font-size:11px;margin-bottom:16px}table{width:100%;border-collapse:collapse}th{background:#1a1a1a;color:#fff;padding:7px 9px;text-align:left;font-size:10px}td{padding:6px 9px;border-bottom:1px solid #e5e5e5;vertical-align:top}tr.repair td{background:#fffbeb}</style></head><body>
   <h2>Orms Used Gear — ${title}</h2>
-  <div class="sub">Exported ${date} · ${rows.length} item${rows.length!==1?'s':''}</div>
+  <div class="sub">Session: ${s?.name||''} · ${rows.length} item${rows.length!==1?'s':''}</div>
   <table><thead><tr><th>SH</th><th>Serial</th><th>OS Doc</th><th>Product</th><th>Rating</th><th>Notes</th><th>Repair</th></tr></thead>
-  <tbody>${tableRows}</tbody></table>
-  </body></html>`;
-
+  <tbody>${rows.map(item=>`<tr class="${item.repair?'repair':''}"><td>${item.sh||'—'}</td><td>${item.serial||'—'}</td><td>${item.osdoc||'—'}</td><td>${item.product||'—'}</td><td>${item.rating||'—'}</td><td>${item.notes||''}</td><td>${item.repair?'✓':''}</td></tr>`).join('')}</tbody></table></body></html>`;
   const win = window.open('','_blank');
-  win.document.write(html);
-  win.document.close();
-  win.print();
+  win.document.write(html); win.document.close(); win.print();
 }
 
 // ── INIT ─────────────────────────────────────────────────
 loadSaved();
-renderUnknown();
 </script>
 </body>
 </html>
