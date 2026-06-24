@@ -1,1 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>SH Lookup</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
 
+  :root {
+    --bg: #0f0f0f;
+    --surface: #1a1a1a;
+    --border: #2a2a2a;
+    --accent: #f97316;
+    --accent2: #fb923c;
+    --text: #f5f5f5;
+    --muted: #888;
+    --green: #22c55e;
+    --red: #ef4444;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', sans-serif;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  header {
+    padding: 16px 20px 12px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  header .logo {
+    width: 32px; height: 32px;
+    background: var(--accent);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+  }
+
+  header h1 {
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+  }
+
+  header span {
+    font-size: 12px;
+    color: var(--muted);
+    font-weight: 400;
+    margin-left: 2px;
+  }
+
+  .tab-bar {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .tab-bar button {
+    flex: 1;
+    padding: 12px;
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.15s;
+  }
+
+  .tab-bar button.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+
+  .tab-content { display: none; flex: 1; flex-direction: column; }
+  .tab-content.active { display: flex; }
+
+  /* SCAN TAB */
+  .scan-area {
+    padding: 16px 20px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    flex: 1;
+  }
+
+  #preview-wrap {
+    background: var(--surface);
+    border: 2px dashed var(--border);
+    border-radius: 16px;
+    min-height: 180px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  #preview-wrap img {
+    width: 100%;
+    max-height: 280px;
+    object-fit: contain;
+    border-radius: 14px;
+  }
+
+  #preview-wrap .placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  #preview-wrap .placeholder .icon { font-size: 36px; opacity: 0.4; }
+
+  .btn-capture {
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 14px;
+    padding: 15px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .btn-capture:active { opacity: 0.8; }
+  #file-input { display: none; }
+
+  .manual-row {
+    display: flex;
+    gap: 8px;
+  }
+
+  .manual-row input {
+    flex: 1;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    color: var(--text);
+    font-size: 15px;
+    font-family: 'SF Mono', 'Courier New', monospace;
+    padding: 12px 14px;
+    letter-spacing: 0.5px;
+  }
+
+  .manual-row input:focus { outline: none; border-color: var(--accent); }
+  .manual-row input::placeholder { color: var(--muted); font-family: -apple-system, sans-serif; letter-spacing: 0; font-size: 14px; }
+
+  .manual-row button {
+    background: var(--accent);
+    border: none;
+    color: white;
+    border-radius: 12px;
+    padding: 12px 18px;
+    font-size: 18px;
+    font-weight: 700;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  .manual-row button:disabled { opacity: 0.3; }
+
+  .status {
+    text-align: center;
+    font-size: 13px;
+    color: var(--muted);
+    padding: 4px 0;
+    min-height: 24px;
+  }
+
+  .spinner {
+    display: inline-block;
+    width: 14px; height: 14px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    vertical-align: middle;
+    margin-right: 6px;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* RESULT BOX */
+  .result-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px;
+    display: none;
+    gap: 10px;
+    flex-direction: column;
+  }
+
+  .result-box.visible { display: flex; }
+  .result-box.found { border-color: var(--green); }
+  .result-box.not-found { border-color: var(--red); }
+  .result-box.serial-only { border-color: var(--accent); }
+
+  .result-item-name {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.3;
+  }
+
+  .result-item-name.none { color: var(--muted); font-size: 14px; font-weight: 400; }
+
+  .result-fields {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .result-field {
+    background: var(--bg);
+    border-radius: 10px;
+    padding: 10px 12px;
+  }
+
+  .field-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--muted);
+    margin-bottom: 3px;
+  }
+
+  .field-value {
+    font-size: 14px;
+    font-weight: 700;
+    font-family: 'SF Mono', monospace;
+    color: var(--green);
+    word-break: break-all;
+  }
+
+  .field-value.muted { color: var(--muted); font-weight: 400; font-size: 12px; }
+
+  .result-actions {
+    display: flex;
+    gap: 8px;
+  }
+
+  .copy-btn {
+    flex: 1;
+    background: var(--accent);
+    border: none;
+    color: white;
+    padding: 10px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .copy-btn.secondary {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+  }
+
+  .raw-serials {
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.8;
+    border-top: 1px solid var(--border);
+    padding-top: 10px;
+  }
+
+  /* GEAR LIST TAB */
+  .list-area {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    flex: 1;
+  }
+
+  .list-area p {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  .list-area p code {
+    background: var(--surface);
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-family: 'SF Mono', monospace;
+    font-size: 12px;
+    color: var(--accent2);
+  }
+
+  textarea {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    color: var(--text);
+    font-family: 'SF Mono', 'Courier New', monospace;
+    font-size: 12px;
+    line-height: 1.6;
+    padding: 14px;
+    resize: vertical;
+    min-height: 200px;
+    flex: 1;
+  }
+
+  textarea:focus { outline: none; border-color: var(--accent); }
+
+  .btn-save {
+    background: var(--surface);
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    border-radius: 12px;
+    padding: 13px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .gear-count {
+    font-size: 12px;
+    color: var(--green);
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">🔍</div>
+  <h1>SH Lookup <span>by Orms</span></h1>
+</header>
+
+<div class="tab-bar">
+  <button class="active" onclick="switchTab('scan')">📷 Scan</button>
+  <button onclick="switchTab('list')">📋 Gear List</button>
+</div>
+
+<!-- SCAN TAB -->
+<div id="tab-scan" class="tab-content active">
+  <div class="scan-area">
+    <div id="preview-wrap">
+      <div class="placeholder">
+        <span class="icon">📷</span>
+        <span>Take a photo of the serial number</span>
+      </div>
+    </div>
+
+    <button class="btn-capture" onclick="document.getElementById('file-input').click()">
+      📷 Take Photo / Choose Image
+    </button>
+    <input type="file" id="file-input" accept="image/*" capture="environment" onchange="handleImage(this)">
+
+    <div class="manual-row">
+      <input type="text" id="manual-input" placeholder="Type serial or SH number…" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" oninput="onManualInput()" onkeydown="if(event.key==='Enter')manualLookup()">
+      <button id="manual-btn" onclick="manualLookup()" disabled>→</button>
+    </div>
+
+    <div id="status" class="status"></div>
+
+    <div id="result-box" class="result-box">
+      <div id="result-item-name" class="result-item-name">—</div>
+
+      <div class="result-fields">
+        <div class="result-field">
+          <div class="field-label">SH Number</div>
+          <div id="field-sh" class="field-value muted">—</div>
+        </div>
+        <div class="result-field">
+          <div class="field-label">Serial Number</div>
+          <div id="field-serial" class="field-value muted">—</div>
+        </div>
+      </div>
+
+      <div id="result-actions" class="result-actions" style="display:none">
+        <button class="copy-btn" onclick="copyField('sh')">Copy SH</button>
+        <button class="copy-btn secondary" onclick="copyField('serial')">Copy Serial</button>
+      </div>
+
+      <div id="raw-serials" class="raw-serials" style="display:none"></div>
+    </div>
+  </div>
+</div>
+
+<!-- GEAR LIST TAB -->
+<div id="tab-list" class="tab-content">
+  <div class="list-area">
+    <p>
+      Paste your gear list — one item per line:<br>
+      <code>SH00123, SERIAL, Item Name</code><br><br>
+      Serial and SH are required. Item name is optional but recommended. You can also search by SH number.
+    </p>
+    <textarea id="gear-input" placeholder="e.g.
+SH00123, SN1234567, Canon EOS R5
+SH00456, SN9876543, Sony 70-200mm f/2.8
+SH00789, ABC123XYZ"></textarea>
+    <button class="btn-save" onclick="saveList()">✓ Save Gear List</button>
+    <div id="gear-count" class="gear-count"></div>
+  </div>
+</div>
+
+<script>
+const ANTHROPIC_API = "https://api.anthropic.com/v1/messages";
+
+// Each entry: { serial, sh, item }
+// Lookup maps: serialMap[SERIAL] -> entry, shMap[SH] -> entry
+let serialMap = {};
+let shMap = {};
+let entries = [];
+
+function loadSaved() {
+  try {
+    const saved = localStorage.getItem('orms-sh-gear-v2');
+    if (saved) {
+      entries = JSON.parse(saved);
+      buildMaps();
+      updateGearCount();
+      rebuildTextarea();
+    }
+  } catch(e) {}
+}
+
+function buildMaps() {
+  serialMap = {};
+  shMap = {};
+  entries.forEach(e => {
+    if (e.serial) serialMap[e.serial.toUpperCase().replace(/\s/g,'')] = e;
+    if (e.sh) shMap[e.sh.toUpperCase().replace(/\s/g,'')] = e;
+  });
+}
+
+function rebuildTextarea() {
+  const lines = entries.map(e => [e.sh, e.serial, e.item].filter(Boolean).join(', ')).join('\n');
+  document.getElementById('gear-input').value = lines;
+}
+
+function updateGearCount() {
+  document.getElementById('gear-count').textContent = entries.length ? `✓ ${entries.length} items loaded` : '';
+}
+
+function saveList() {
+  const raw = document.getElementById('gear-input').value.trim();
+  if (!raw) return;
+  entries = [];
+  raw.split('\n').forEach(line => {
+    const parts = line.split(/[,\t]+/).map(p => p.trim()).filter(Boolean);
+    if (parts.length >= 2) {
+      entries.push({
+        sh: parts[0] || '',
+        serial: parts[1] || '',
+        item: parts[2] || ''
+      });
+    }
+  });
+  buildMaps();
+  localStorage.setItem('orms-sh-gear-v2', JSON.stringify(entries));
+  updateGearCount();
+  document.getElementById('gear-count').textContent = `✓ ${entries.length} items saved`;
+  switchTab('scan');
+}
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-bar button').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  document.querySelector(`.tab-bar button[onclick*="${tab}"]`).classList.add('active');
+}
+
+async function handleImage(input) {
+  const file = input.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    const b64 = e.target.result.split(',')[1];
+    document.getElementById('preview-wrap').innerHTML = `<img src="${e.target.result}" alt="preview">`;
+    setStatus('<span class="spinner"></span> Reading serial number…');
+    hideResult();
+
+    try {
+      const detected = await extractSerials(b64, file.type);
+      showResult(detected);
+    } catch(err) {
+      setStatus('⚠️ ' + err.message);
+    }
+  };
+  reader.readAsDataURL(file);
+  input.value = '';
+}
+
+async function extractSerials(b64, mimeType) {
+  const resp = await fetch(ANTHROPIC_API, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-6',
+      max_tokens: 500,
+      messages: [{
+        role: 'user',
+        content: [
+          { type: 'image', source: { type: 'base64', media_type: mimeType || 'image/jpeg', data: b64 } },
+          { type: 'text', text: `Extract ALL serial numbers visible in this image of camera/photography equipment. Serial numbers are alphanumeric strings on labels or engraved on the body.
+
+Respond ONLY with JSON (no markdown):
+{"serials": ["SN12345", "SN67890"]}
+
+If none visible: {"serials": []}
+Do not include label text like "S/N" or "Serial No" — only the number itself.` }
+        ]
+      }]
+    })
+  });
+
+  if (!resp.ok) {
+    const err = await resp.json();
+    throw new Error(err.error?.message || 'API error');
+  }
+
+  const data = await resp.json();
+  const text = data.content.map(c => c.text || '').join('');
+  const parsed = JSON.parse(text.replace(/```json|```/g, '').trim());
+  return parsed.serials || [];
+}
+
+function lookup(query) {
+  const key = query.toUpperCase().replace(/\s/g,'');
+  return serialMap[key] || shMap[key] || null;
+}
+
+function showResult(detectedSerials) {
+  setStatus('');
+  const box = document.getElementById('result-box');
+  const nameEl = document.getElementById('result-item-name');
+  const shEl = document.getElementById('field-sh');
+  const serialEl = document.getElementById('field-serial');
+  const actionsEl = document.getElementById('result-actions');
+  const rawEl = document.getElementById('raw-serials');
+  const hasGear = entries.length > 0;
+
+  // Try to find match from detected serials
+  let match = null;
+  let primarySerial = detectedSerials[0] || '';
+
+  for (const s of detectedSerials) {
+    match = lookup(s);
+    if (match) { primarySerial = s; break; }
+  }
+
+  box.className = 'result-box visible ' + (match ? 'found' : (hasGear ? 'not-found' : 'serial-only'));
+
+  if (match) {
+    nameEl.className = 'result-item-name';
+    nameEl.textContent = match.item || 'Item found';
+    shEl.className = 'field-value';
+    shEl.textContent = match.sh || '—';
+    serialEl.className = 'field-value';
+    serialEl.textContent = match.serial || primarySerial;
+    actionsEl.style.display = 'flex';
+    actionsEl.dataset.sh = match.sh || '';
+    actionsEl.dataset.serial = match.serial || primarySerial;
+  } else if (!detectedSerials.length) {
+    nameEl.className = 'result-item-name none';
+    nameEl.textContent = 'No serial number detected — try a clearer photo';
+    shEl.className = 'field-value muted'; shEl.textContent = '—';
+    serialEl.className = 'field-value muted'; serialEl.textContent = '—';
+    actionsEl.style.display = 'none';
+  } else {
+    nameEl.className = 'result-item-name none';
+    nameEl.textContent = hasGear ? 'Not found in gear list' : 'Add gear list to look up SH & item';
+    shEl.className = 'field-value muted'; shEl.textContent = hasGear ? '—' : 'No list';
+    serialEl.className = 'field-value'; serialEl.textContent = primarySerial;
+    actionsEl.style.display = hasGear ? 'none' : 'none';
+  }
+
+  // Show all if multiple detected
+  if (detectedSerials.length > 1) {
+    rawEl.style.display = 'block';
+    rawEl.innerHTML = '<strong style="color:var(--muted)">All detected:</strong> ' +
+      detectedSerials.map(s => {
+        const m = lookup(s);
+        return `<span style="color:var(--text);font-family:monospace">${s}</span>${m ? ` → <span style="color:var(--green)">${m.sh}</span>` : ''}`;
+      }).join(' &nbsp;·&nbsp; ');
+  } else {
+    rawEl.style.display = 'none';
+  }
+}
+
+function hideResult() {
+  document.getElementById('result-box').className = 'result-box';
+}
+
+function setStatus(html) {
+  document.getElementById('status').innerHTML = html;
+}
+
+let currentSH = '';
+let currentSerial = '';
+
+function copyField(field) {
+  const actionsEl = document.getElementById('result-actions');
+  const val = field === 'sh' ? actionsEl.dataset.sh : actionsEl.dataset.serial;
+  if (!val) return;
+  navigator.clipboard.writeText(val).then(() => {
+    const btns = actionsEl.querySelectorAll('.copy-btn');
+    const btn = field === 'sh' ? btns[0] : btns[1];
+    const orig = btn.textContent;
+    btn.textContent = '✓ Copied';
+    setTimeout(() => btn.textContent = orig, 1500);
+  });
+}
+
+function onManualInput() {
+  const val = document.getElementById('manual-input').value.trim();
+  document.getElementById('manual-btn').disabled = val.length === 0;
+}
+
+function manualLookup() {
+  const val = document.getElementById('manual-input').value.trim();
+  if (!val) return;
+  showResult([val]);
+  document.getElementById('manual-input').blur();
+}
+
+loadSaved();
+</script>
+</body>
+</html>
