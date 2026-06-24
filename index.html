@@ -893,6 +893,20 @@ function selectResult(key) {
   if (match) showCard(match, key);
 }
 
+// Physical keyboard support — type on hardware/phone keyboard
+document.addEventListener('keydown', (e) => {
+  // Only when Scan tab is active
+  if (!document.getElementById('tab-scan').classList.contains('active')) return;
+  if (e.metaKey || e.ctrlKey || e.altKey) return;
+  if (e.key === 'Backspace') { e.preventDefault(); npDelete(); }
+  else if (e.key === 'Escape') { clearSearch(); }
+  else if (e.key.length === 1 && /[a-zA-Z0-9]/.test(e.key)) {
+    searchVal += e.key.toUpperCase();
+    updateSearchDisplay();
+    doLiveSearch();
+  }
+});
+
 function lookup(q) { const k=norm(q); return shMap[k]||serialMap[k]||null; }
 
 // ── CARD ─────────────────────────────────────────────────
