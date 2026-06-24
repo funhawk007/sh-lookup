@@ -181,6 +181,82 @@
   .ss-delete:hover { background: var(--red-light); color: var(--red); }
 
   .empty-state { text-align: center; color: var(--muted); font-size: 13px; padding: 30px 20px; }
+
+  /* SEARCH DISPLAY */
+  .search-display {
+    background: var(--surface);
+    border: 2px solid var(--border);
+    border-radius: 16px;
+    padding: 14px 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+  .search-input-row { display: flex; align-items: center; gap: 10px; }
+  .search-display-val {
+    flex: 1;
+    font-size: 28px;
+    font-weight: 800;
+    font-family: 'SF Mono', monospace;
+    color: var(--text);
+    letter-spacing: 2px;
+    min-height: 40px;
+    display: flex; align-items: center;
+  }
+  .search-placeholder { color: var(--muted); font-size: 14px; font-weight: 400; font-family: -apple-system, sans-serif; letter-spacing: 0; }
+  .search-clear-btn { background: var(--bg); border: 1.5px solid var(--border); color: var(--muted); border-radius: 50%; width: 32px; height: 32px; font-size: 14px; cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+
+  /* LIVE RESULTS */
+  .live-results {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+  }
+  .live-result-item {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    display: flex; align-items: center; gap: 12px;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .live-result-item:last-child { border-bottom: none; }
+  .live-result-item:active { background: var(--accent-light); }
+  .live-result-sh { font-size: 15px; font-weight: 800; color: var(--accent); font-family: 'SF Mono', monospace; flex-shrink: 0; min-width: 80px; }
+  .live-result-info { flex: 1; min-width: 0; }
+  .live-result-desc { font-size: 13px; font-weight: 500; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .live-result-serial { font-size: 11px; color: var(--muted); font-family: monospace; margin-top: 1px; }
+  .live-result-more { padding: 10px 16px; text-align: center; font-size: 12px; color: var(--muted); background: var(--surface2); }
+
+  /* NUMPAD */
+  .numpad {
+    background: var(--surface);
+    border-radius: 16px;
+    padding: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    border: 1px solid var(--border);
+  }
+  .numpad-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 8px; }
+  .numpad-row:last-child { margin-bottom: 0; }
+  .numpad-row:has(.np-sm) { grid-template-columns: repeat(6, 1fr); }
+  .np-btn {
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    border-radius: 11px;
+    padding: 16px 8px;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text);
+    cursor: pointer;
+    text-align: center;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    transition: background 0.1s;
+  }
+  .np-btn:active { background: var(--accent-light); border-color: var(--accent); color: var(--accent); }
+  .np-del { color: var(--red); font-size: 18px; }
+  .np-alpha { background: var(--surface2); color: var(--muted); font-size: 13px; font-weight: 700; }
+  .np-sm { padding: 11px 4px; font-size: 14px; font-weight: 700; }
+
 </style>
 </head>
 <body>
@@ -204,22 +280,23 @@
 <!-- SCAN TAB -->
 <div id="tab-scan" class="tab-content active">
   <div class="scan-area">
-    <div id="preview-wrap">
-      <div class="placeholder">
-        <span class="icon">📷</span>
-        <span>Take a photo of the serial number</span>
+
+    <!-- Search display -->
+    <div class="search-display">
+      <div class="search-input-row">
+        <div id="search-display-val" class="search-display-val">
+          <span id="search-display-text" class="search-placeholder">Type or use pad below…</span>
+        </div>
+        <button class="search-clear-btn" onclick="clearSearch()" id="search-clear-btn" style="display:none">✕</button>
       </div>
     </div>
-    <button class="btn-capture" onclick="document.getElementById('file-input').click()">
-      📷 Take Photo / Choose Image
-    </button>
-    <input type="file" id="file-input" accept="image/*" capture="environment" onchange="handleImage(this)">
-    <div class="manual-row">
-      <input type="text" id="manual-input" placeholder="Type SH or serial number…" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" oninput="onManualInput()" onkeydown="if(event.key==='Enter')manualLookup()">
-      <button id="manual-btn" onclick="manualLookup()" disabled>→</button>
-    </div>
+
+    <!-- Live results dropdown -->
+    <div id="live-results" class="live-results" style="display:none"></div>
+
     <div id="status" class="status"></div>
 
+    <!-- Result card -->
     <div id="result-card" class="result-card">
       <div id="card-top" class="card-top">
         <div class="card-status-row">
@@ -266,6 +343,63 @@
         <button class="btn-add" onclick="addToSession()">+ Add to Session List</button>
       </div>
     </div>
+    <!-- Number Pad -->
+    <div class="numpad" id="numpad">
+      <div class="numpad-row">
+        <button class="np-btn" onclick="npInput('1')">1</button>
+        <button class="np-btn" onclick="npInput('2')">2</button>
+        <button class="np-btn" onclick="npInput('3')">3</button>
+      </div>
+      <div class="numpad-row">
+        <button class="np-btn" onclick="npInput('4')">4</button>
+        <button class="np-btn" onclick="npInput('5')">5</button>
+        <button class="np-btn" onclick="npInput('6')">6</button>
+      </div>
+      <div class="numpad-row">
+        <button class="np-btn" onclick="npInput('7')">7</button>
+        <button class="np-btn" onclick="npInput('8')">8</button>
+        <button class="np-btn" onclick="npInput('9')">9</button>
+      </div>
+      <div class="numpad-row">
+        <button class="np-btn np-alpha" onclick="toggleAlpha()">ABC</button>
+        <button class="np-btn" onclick="npInput('0')">0</button>
+        <button class="np-btn np-del" onclick="npDelete()">⌫</button>
+      </div>
+      <!-- Alpha rows (hidden by default) -->
+      <div id="alpha-rows" style="display:none">
+        <div class="numpad-row">
+          <button class="np-btn np-sm" onclick="npInput('A')">A</button>
+          <button class="np-btn np-sm" onclick="npInput('B')">B</button>
+          <button class="np-btn np-sm" onclick="npInput('C')">C</button>
+          <button class="np-btn np-sm" onclick="npInput('D')">D</button>
+          <button class="np-btn np-sm" onclick="npInput('E')">E</button>
+          <button class="np-btn np-sm" onclick="npInput('F')">F</button>
+        </div>
+        <div class="numpad-row">
+          <button class="np-btn np-sm" onclick="npInput('G')">G</button>
+          <button class="np-btn np-sm" onclick="npInput('H')">H</button>
+          <button class="np-btn np-sm" onclick="npInput('J')">J</button>
+          <button class="np-btn np-sm" onclick="npInput('K')">K</button>
+          <button class="np-btn np-sm" onclick="npInput('L')">L</button>
+          <button class="np-btn np-sm" onclick="npInput('M')">M</button>
+        </div>
+        <div class="numpad-row">
+          <button class="np-btn np-sm" onclick="npInput('N')">N</button>
+          <button class="np-btn np-sm" onclick="npInput('P')">P</button>
+          <button class="np-btn np-sm" onclick="npInput('R')">R</button>
+          <button class="np-btn np-sm" onclick="npInput('S')">S</button>
+          <button class="np-btn np-sm" onclick="npInput('T')">T</button>
+          <button class="np-btn np-sm" onclick="npInput('W')">W</button>
+        </div>
+        <div class="numpad-row">
+          <button class="np-btn np-sm" onclick="npInput('X')">X</button>
+          <button class="np-btn np-sm" onclick="npInput('Y')">Y</button>
+          <button class="np-btn np-sm" onclick="npInput('Z')">Z</button>
+          <button class="np-btn np-sm np-alpha" onclick="toggleAlpha()">123</button>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -644,53 +778,122 @@ function updateDBSummary() {
   }
 }
 
-// ── SCAN ─────────────────────────────────────────────────
-async function handleImage(input) {
-  const file = input.files[0]; if (!file) return;
-  const reader = new FileReader();
-  reader.onload = async (e) => {
-    const b64 = e.target.result.split(',')[1];
-    document.getElementById('preview-wrap').innerHTML = `<img src="${e.target.result}" alt="preview">`;
-    setStatus('<span class="spinner"></span> Reading serial number…');
-    hideCard();
-    try {
-      const serials = await extractSerials(b64, file.type);
-      if (!serials.length) { setStatus('No serial found — try a clearer photo'); return; }
-      const match = serials.map(s=>lookup(s)).find(Boolean);
-      showCard(match, serials[0]);
-    } catch(err) { setStatus('⚠️ ' + err.message); }
-  };
-  reader.readAsDataURL(file);
-  input.value = '';
+// ── NUMPAD + LIVE SEARCH ─────────────────────────────────
+let searchVal = '';
+let alphaOpen = false;
+
+function npInput(ch) {
+  searchVal += ch;
+  updateSearchDisplay();
+  doLiveSearch();
 }
 
-async function extractSerials(b64, mimeType) {
-  const resp = await fetch(API, {
-    method:'POST', headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({ model:'claude-sonnet-4-6', max_tokens:400,
-      messages:[{role:'user', content:[
-        {type:'image', source:{type:'base64', media_type:mimeType||'image/jpeg', data:b64}},
-        {type:'text', text:'Extract all serial numbers from this camera/photography equipment. Return ONLY JSON, no markdown:\n{"serials":["SN123"]}\nIf none: {"serials":[]}\nOmit label text like S/N.'}
-      ]}]
-    })
+function npDelete() {
+  searchVal = searchVal.slice(0, -1);
+  updateSearchDisplay();
+  doLiveSearch();
+}
+
+function clearSearch() {
+  searchVal = '';
+  alphaOpen = false;
+  document.getElementById('alpha-rows').style.display = 'none';
+  updateSearchDisplay();
+  document.getElementById('live-results').style.display = 'none';
+  hideCard();
+}
+
+function toggleAlpha() {
+  alphaOpen = !alphaOpen;
+  document.getElementById('alpha-rows').style.display = alphaOpen ? 'block' : 'none';
+  document.querySelectorAll('.np-alpha').forEach(b => {
+    b.style.background = alphaOpen ? 'var(--accent-light)' : '';
+    b.style.color = alphaOpen ? 'var(--accent)' : '';
+    b.style.borderColor = alphaOpen ? 'var(--accent)' : '';
   });
-  if (!resp.ok) { const e=await resp.json(); throw new Error(e.error?.message||'API error'); }
-  const data = await resp.json();
-  const text = data.content.map(c=>c.text||'').join('');
-  return JSON.parse(text.replace(/```json|```/g,'').trim()).serials||[];
+}
+
+function updateSearchDisplay() {
+  const dispText = document.getElementById('search-display-text');
+  const clearBtn = document.getElementById('search-clear-btn');
+  const display = document.getElementById('search-display-val');
+  if (searchVal) {
+    dispText.className = '';
+    dispText.textContent = searchVal;
+    clearBtn.style.display = 'flex';
+    document.getElementById('search-display').style.borderColor = 'var(--accent)';
+  } else {
+    dispText.className = 'search-placeholder';
+    dispText.textContent = 'Type or use pad below…';
+    clearBtn.style.display = 'none';
+    document.getElementById('search-display').style.borderColor = '';
+  }
+}
+
+function doLiveSearch() {
+  const q = searchVal.toUpperCase().replace(/[\s\-]/g,'');
+  const liveEl = document.getElementById('live-results');
+
+  if (q.length === 0) {
+    liveEl.style.display = 'none';
+    hideCard();
+    return;
+  }
+
+  // Exact match first
+  const exact = shMap[q] || serialMap[q];
+  if (exact) {
+    liveEl.style.display = 'none';
+    showCard(exact, searchVal);
+    return;
+  }
+
+  // Partial match — search all entries from all uploads
+  if (q.length >= 3) {
+    const allEntries = uploads.flatMap(u => u.entries);
+    const matches = allEntries.filter(e => {
+      const s = norm(e.serial);
+      const sh = norm(e.sh);
+      const od = norm(e.osdoc);
+      return s.includes(q) || sh.includes(q) || od.includes(q);
+    });
+
+    if (matches.length === 0) {
+      liveEl.style.display = 'none';
+      hideCard();
+      setStatus(uploads.length ? '🔍 No matches for "' + searchVal + '"' : '');
+      return;
+    }
+
+    setStatus('');
+    hideCard();
+
+    const show = matches.slice(0, 8);
+    const more = matches.length - show.length;
+    liveEl.innerHTML = show.map(m => `
+      <div class="live-result-item" onclick="selectResult('${norm(m.serial || m.sh)}')">
+        <div class="live-result-sh">${m.sh || '—'}</div>
+        <div class="live-result-info">
+          <div class="live-result-desc">${m.desc || m.product || '—'}</div>
+          <div class="live-result-serial">${m.serial || ''}</div>
+        </div>
+      </div>`).join('') +
+      (more > 0 ? `<div class="live-result-more">+${more} more — keep typing to narrow down</div>` : '');
+    liveEl.style.display = 'block';
+  } else {
+    liveEl.style.display = 'none';
+    hideCard();
+    setStatus('Type ' + (3 - q.length) + ' more character' + (3-q.length===1?'':'s') + ' to search…');
+  }
+}
+
+function selectResult(key) {
+  const match = shMap[key] || serialMap[key];
+  document.getElementById('live-results').style.display = 'none';
+  if (match) showCard(match, key);
 }
 
 function lookup(q) { const k=norm(q); return shMap[k]||serialMap[k]||null; }
-
-function manualLookup() {
-  const val = document.getElementById('manual-input').value.trim();
-  if (!val) return;
-  showCard(lookup(val), val);
-  document.getElementById('manual-input').blur();
-}
-function onManualInput() {
-  document.getElementById('manual-btn').disabled = !document.getElementById('manual-input').value.trim();
-}
 
 // ── CARD ─────────────────────────────────────────────────
 function showCard(match, rawQuery) {
