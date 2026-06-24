@@ -323,10 +323,10 @@
     <!-- Upload zone -->
     <div class="upload-zone" onclick="document.getElementById('csv-file-input').click()">
       <div class="upload-icon">📄</div>
-      <div class="upload-label">Upload CSV / gear export</div>
-      <div class="upload-sub">Tap to choose file — adds to existing database</div>
+      <div class="upload-label">Upload Excel or CSV</div>
+      <div class="upload-sub">.xlsx or .csv — adds to existing database</div>
     </div>
-    <input type="file" id="csv-file-input" accept=".csv,.txt" onchange="handleCSVUpload(this)">
+    <input type="file" id="csv-file-input" accept=".csv,.txt,.xlsx,.xls" onchange="handleFileUpload(this)">
 
     <!-- Uploaded docs -->
     <div class="docs-section-title">Uploaded files</div>
@@ -495,7 +495,7 @@ function switchTab(tab) {
   if (tab==='export') renderExport();
 }
 
-// ── CSV UPLOAD ────────────────────────────────────────────
+// ── FILE UPLOAD (CSV + XLSX) ──────────────────────────────
 
 // Proper CSV line parser — handles quoted fields with commas inside
 function parseCSVLine(line) {
@@ -504,89 +504,111 @@ function parseCSVLine(line) {
   for (let i = 0; i < line.length; i++) {
     const ch = line[i];
     if (ch === '"') {
-      if (inQuote && line[i+1] === '"') { cur += '"'; i++; } // escaped quote
+      if (inQuote && line[i+1] === '"') { cur += '"'; i++; }
       else inQuote = !inQuote;
     } else if (ch === ',' && !inQuote) {
       result.push(cur.trim()); cur = '';
-    } else {
-      cur += ch;
-    }
+    } else { cur += ch; }
   }
   result.push(cur.trim());
   return result;
 }
 
-// Extract SH number from a description string like "S/H SH10216 CANON EOS..."
-function extractSH(desc) {
-  const m = desc.match(/\bSH\d+\b/i);
-  return m ? m[0].toUpperCase() : '';
+function processRows(rows2d, fileName) {
+  // rows2d is array of arrays (strings)
+  if (!rows2d.length) { alert('No data found in file.'); return; }
+
+  // Detect header
+  let startIdx = 0;
+  const firstRow = rows2d[0].map(c => (c||'').toString().toLowerCase().trim());
+  const headerKeywords = ['os doc','serial','description','shutter','rating','sh','product','notes'];
+  if (firstRow.some(h => headerKeywords.some(k => h.includes(k)))) startIdx = 1;
+
+  // Map columns from header
+  let colOsDoc=0, colSH=1, colDesc=2, colSerial=3, colShutter=4, colRating=5, colNotes=6;
+  if (startIdx === 1) {
+    firstRow.forEach((h, i) => {
+      const t = h.trim();
+      if (t.includes('os doc') || t === 'os') colOsDoc = i;
+      else if (t === 'sh' || t.includes('sh number') || t.includes('product')) colSH = i;
+      else if (t.includes('description') || t.includes('desc')) colDesc = i;
+      else if (t.includes('serial')) colSerial = i;
+      else if (t.includes('shutter')) colShutter = i;
+      else if (t.includes('rating')) colRating = i;
+      else if (t.includes('notes') || t.includes('note')) colNotes = i;
+    });
+  }
+
+  let entries = [];
+  for (let i = startIdx; i < rows2d.length; i++) {
+    const p = rows2d[i];
+    const osdoc   = (p[colOsDoc]   || '').toString().trim();
+    const sh      = (p[colSH]      || '').toString().trim();
+    const desc    = (p[colDesc]    || '').toString().trim();
+    // Force serial to string — Excel often stores as number
+    const rawSerial = p[colSerial];
+    const serial  = rawSerial !== undefined && rawSerial !== null && rawSerial !== ''
+                    ? rawSerial.toString().trim() : '';
+    const shutter = (p[colShutter] || '').toString().trim();
+    const rating  = (p[colRating]  || '').toString().trim();
+    const notes   = (p[colNotes]   || '').toString().trim();
+    if (!serial && !sh && !osdoc) continue;
+    entries.push({ sh, serial, osdoc, product: sh, desc, shutter, rating, notes });
+  }
+
+  if (!entries.length) {
+    alert('No valid rows found. Expected columns: OS Doc, SH, Description, Serial, Shutter, Rating, Notes');
+    return;
+  }
+
+  uploads.push({ id: 'upload_' + Date.now(), name: fileName, uploadedAt: Date.now(), rowCount: entries.length, entries });
+  rebuildMaps(); saveAll(); renderDocs();
+  alert('✓ Loaded ' + entries.length + ' items from ' + fileName);
 }
 
-function handleCSVUpload(input) {
+function handleFileUpload(input) {
   const file = input.files[0]; if (!file) return;
+  const isXLSX = file.name.match(/\.xlsx?$/i);
+
+  if (isXLSX) {
+    // Load SheetJS from CDN then parse
+    if (typeof XLSX !== 'undefined') {
+      readXLSX(file);
+    } else {
+      const script = document.createElement('script');
+      script.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+      script.onload = () => readXLSX(file);
+      script.onerror = () => alert('Could not load Excel reader. Try using a CSV export instead.');
+      document.head.appendChild(script);
+    }
+  } else {
+    // CSV path
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const text = e.target.result;
+      const rawLines = text.trim().split(/\r?\n/);
+      const rows2d = rawLines.map(l => parseCSVLine(l));
+      processRows(rows2d, file.name);
+    };
+    reader.readAsText(file);
+  }
+  input.value = '';
+}
+
+function readXLSX(file) {
   const reader = new FileReader();
   reader.onload = (e) => {
-    const text = e.target.result;
-    const rawLines = text.trim().split(/\r?\n/);
-    let entries = [];
-    let startIdx = 0;
-
-    // Detect and skip header row
-    const firstLine = rawLines[0].toLowerCase();
-    // Skip header if first line contains known header words
-    if (firstLine.includes('os doc') || firstLine.includes('serial') || firstLine.includes('description') || firstLine.includes('shutter') || firstLine.includes('rating') || firstLine.includes('product') || firstLine.includes('sh')) startIdx = 1;
-
-    // Column order: OS Doc, SH, Description, Serial, Shutter, Rating, Notes
-    let colOsDoc=0, colSH=1, colDesc=2, colSerial=3, colShutter=4, colRating=5, colNotes=6;
-    if (startIdx === 1) {
-      const hdr = parseCSVLine(rawLines[0].toLowerCase());
-      hdr.forEach((h, i) => {
-        const t = h.trim();
-        if (t.includes('os doc') || t === 'os') colOsDoc = i;
-        else if (t === 'sh' || t.includes('sh number') || t.includes('product')) colSH = i;
-        else if (t.includes('description') || t.includes('desc')) colDesc = i;
-        else if (t.includes('serial')) colSerial = i;
-        else if (t.includes('shutter')) colShutter = i;
-        else if (t.includes('rating')) colRating = i;
-        else if (t.includes('notes') || t.includes('note')) colNotes = i;
-      });
+    try {
+      const wb = XLSX.read(e.target.result, { type: 'array', raw: false, cellText: true });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      // Use raw:false so numbers stay as strings, defval:'' for empty cells
+      const rows2d = XLSX.utils.sheet_to_json(ws, { header: 1, raw: false, defval: '' });
+      processRows(rows2d, file.name);
+    } catch(err) {
+      alert('Could not read Excel file: ' + err.message);
     }
-
-    for (let i = startIdx; i < rawLines.length; i++) {
-      const line = rawLines[i].trim();
-      if (!line) continue;
-      const p = parseCSVLine(line);
-      const osdoc   = p[colOsDoc]   || '';
-      const sh      = (p[colSH]     || '').trim();
-      const desc    = p[colDesc]    || '';
-      const serial  = p[colSerial]  || '';
-      const shutter = p[colShutter] || '';
-      const rating  = p[colRating]  || '';
-      const notes   = p[colNotes]   || '';
-
-      if (!serial && !sh && !osdoc) continue;
-      entries.push({ sh, serial, osdoc, product: sh, desc, shutter, rating, notes });
-    }
-
-    if (!entries.length) {
-      alert('No valid data found. Expected columns: OS Doc, SH, Description, Serial, Shutter, Rating, Notes');
-      return;
-    }
-
-    uploads.push({
-      id: 'upload_' + Date.now(),
-      name: file.name,
-      uploadedAt: Date.now(),
-      rowCount: entries.length,
-      entries
-    });
-    rebuildMaps();
-    saveAll();
-    renderDocs();
-    alert(`✓ Loaded ${entries.length} items from ${file.name}`);
   };
-  reader.readAsText(file);
-  input.value = '';
+  reader.readAsArrayBuffer(file);
 }
 
 function deleteUpload(id) {
